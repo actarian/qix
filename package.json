@@ -1,0 +1,17 @@
+{
+  "name": "qix-js",
+  "author": "Renaud Ninauve",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-runtime": "~7.9.6",
+    "gulpfile-config": "1.0.0-alpha.9"
+  },
+  "dependencies": {
+    "geometric": "^2.2.1",
+    "polybooljs": "^1.2.0"
+  }
+}

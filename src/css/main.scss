@@ -1,0 +1,43 @@
+@mixin aspect-clip($w: 4, $h: 3) {
+	position: relative;
+	width: 100%;
+	padding-top: 100% / $w * $h;
+	overflow: hidden;
+
+	&>img,
+	&>svg,
+	&>video,
+	&>canvas,
+	&>.video,
+	&>iframe,
+	&>div {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+}
+
+body {
+	background: black;
+}
+
+.game-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 60px;
+}
+
+.game {
+	@include aspect-clip(4, 3);
+}
+
+.canvas {
+	border: 1px solid red;
+	box-sizing: border-box;
+}
