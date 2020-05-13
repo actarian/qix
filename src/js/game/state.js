@@ -11,4 +11,8 @@ export const State = {
 	keys: {},
 	score: 0,
 	area: 0,
+	maxEnemies: 5,
+	addEnemy: () => {},
+	removeEnemy: () => {},
+	addPoints: () => {},
 };

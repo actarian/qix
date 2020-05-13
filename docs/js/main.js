@@ -426,7 +426,11 @@
 	  frameCount: 0,
 	  keys: {},
 	  score: 0,
-	  area: 0
+	  area: 0,
+	  maxEnemies: 5,
+	  addEnemy: function addEnemy() {},
+	  removeEnemy: function removeEnemy() {},
+	  addPoints: function addPoints() {}
 	};
 
 	function _defineProperties(target, props) {
@@ -721,7 +725,12 @@
 	    }, false);
 	  };
 
-	  _proto.inside = function inside(actor) {
+	  _proto.isInside = function isInside(actor) {
+	    var points = this.getPoints();
+	    return this.isPointInside(actor.position, points);
+	  };
+
+	  _proto.willBeInside = function willBeInside(actor) {
 	    var points = this.getPoints();
 	    return this.isPointInside(actor.segment.b, points);
 	  };
@@ -911,14 +920,37 @@
 	  }]);
 
 	  function Enemy() {
-	    var ground = State.ground;
-	    this.position = new Vector2(ground.x(0.5), ground.y(0.5));
+	    this.position = new Vector2();
+
+	    if (State.enemies && State.enemies.length) {
+	      this.getRandomPosition();
+	    } else {
+	      this.getCenterPosition();
+	    }
+
 	    this.direction = new Vector2(0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1), 0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1)).normalize();
-	    this.speed = 3 + Math.random() * 2;
+	    this.speed = 3; // 2 + Math.random() * 2;
+
 	    this.segment = new Segment();
 	  }
 
 	  var _proto = Enemy.prototype;
+
+	  _proto.getCenterPosition = function getCenterPosition() {
+	    var ground = State.ground;
+	    this.position.x = ground.x(0.5);
+	    this.position.y = ground.y(0.5);
+	  };
+
+	  _proto.getRandomPosition = function getRandomPosition() {
+	    var ground = State.ground;
+	    this.position.x = ground.x(Math.random());
+	    this.position.y = ground.y(Math.random());
+
+	    if (!ground.isInside(this)) {
+	      this.getRandomPosition();
+	    }
+	  };
 
 	  _proto.update = function update() {
 	    if (!this.checkCollision()) {
@@ -1185,14 +1217,6 @@
 	        points.push(points[0]);
 	        this.rebuild(points);
 	      }
-
-	      State.area = this.getArea();
-	      State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100);
-	      console.log('State', State.area, State.percent);
-	      var bar = document.querySelector('.progress__bar');
-	      gsap.set(bar, {
-	        width: State.percent + "%"
-	      });
 	    }
 	  };
 
@@ -1343,8 +1367,7 @@
 
 	    if (this.active && (this.direction.x || this.direction.y)) {
 	      if (hitted = ground.hit(this, 2)) {
-	        console.log('hitted');
-
+	        // console.log('hitted');
 	        if (hitted instanceof Segment && cut.segments.length) {
 	          var i = hitted.getIntersection(this.segment);
 
@@ -1359,13 +1382,31 @@
 	          this.lastSegment = hitted;
 	          this.currentSegment = hitted;
 	          this.direction.x = 0;
-	          this.direction.y = 0;
-	          console.log('cut.segments.length', cut.segments.length);
-	          ground.remove(cut, this.firstSegment, this.lastSegment);
+	          this.direction.y = 0; // console.log('cut.segments.length', cut.segments.length);
+
+	          ground.remove(cut, this.firstSegment, this.lastSegment); // update score and enemies
+
+	          State.enemies.forEach(function (enemy) {
+	            if (!ground.isInside(enemy)) {
+	              State.removeEnemy(enemy);
+	              State.addScore(500);
+	            }
+	          });
+	          State.area = ground.getArea();
+	          State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100); // console.log('State', State.area, State.percent);
+
+	          var bar = document.querySelector('.progress__bar');
+	          gsap.set(bar, {
+	            width: State.percent + "%"
+	          });
+	          var area = cut.getArea();
+	          var score = Math.round(Math.sqrt(area));
+	          State.addScore(score); //
+
 	          cut.segments = [];
 	        }
-	      } else if (!ground.inside(this)) {
-	        console.log('outside');
+	      } else if (!ground.willBeInside(this)) {
+	        // console.log('outside');
 	        this.direction.x = 0;
 	        this.direction.y = 0;
 	      } else if (cut.hitSegments(this, 3)) {
@@ -1493,17 +1534,20 @@
 	    this.loop = this.loop.bind(this);
 	    this.onKeydown = this.onKeydown.bind(this);
 	    this.onKeyup = this.onKeyup.bind(this);
+	    State.addEnemy = this.addEnemy.bind(this);
+	    State.removeEnemy = this.removeEnemy.bind(this);
+	    State.addScore = this.addScore.bind(this);
 	    document.addEventListener("keydown", this.onKeydown);
 	    document.addEventListener("keyup", this.onKeyup);
 	  };
 
 	  _proto.start = function start() {
 	    State.area = 0;
+	    State.addEnemy();
 	    this.loop();
-	    this.addMoreEnemy();
 	  };
 
-	  _proto.addMoreEnemy = function addMoreEnemy() {
+	  _proto.addEnemy = function addEnemy() {
 	    var _this2 = this;
 
 	    if (this.to) {
@@ -1511,18 +1555,39 @@
 	    }
 
 	    var add = function add() {
-	      if ( !State.paused) {
-	        State.enemies.push(new Enemy());
+	      console.log('addEnemy');
 
-	        _this2.addMoreEnemy();
+	      if (!State.ended && !State.paused) {
+	        if (State.enemies.length < State.maxEnemies) {
+	          State.enemies.push(new Enemy());
+	        }
+
+	        _this2.addEnemy();
 	      }
 	    };
 
 	    this.to = setTimeout(add, 10000);
 	  };
 
+	  _proto.removeEnemy = function removeEnemy(enemy) {
+	    console.log('removeEnemy', enemy);
+
+	    if (!State.ended && !State.paused) {
+	      var index = State.enemies.indexOf(enemy);
+
+	      if (index !== -1) {
+	        State.enemies.splice(index, 1);
+	      }
+	    }
+	  };
+
+	  _proto.addScore = function addScore(score) {
+	    console.log('addScore', score);
+	    State.score += score;
+	  };
+
 	  _proto.loop = function loop() {
-	    {
+	    if (!State.ended) {
 	      if (!State.paused) {
 	        State.canvas.update();
 	        State.ground.update();
@@ -1555,7 +1620,7 @@
 	    if (State.paused) {
 	      State.paused = false;
 	      this.loop();
-	      this.addMoreEnemy();
+	      this.addEnemy();
 	    } else {
 	      State.paused = true;
 	    }

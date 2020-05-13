@@ -13,11 +13,30 @@ export default class Enemy {
 	}
 
 	constructor() {
-		const ground = State.ground;
-		this.position = new Vector2(ground.x(0.5), ground.y(0.5));
+		this.position = new Vector2();
+		if (State.enemies && State.enemies.length) {
+			this.getRandomPosition();
+		} else {
+			this.getCenterPosition();
+		}
 		this.direction = new Vector2(0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1), 0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1)).normalize();
-		this.speed = 3 + Math.random() * 2;
+		this.speed = 3; // 2 + Math.random() * 2;
 		this.segment = new Segment();
+	}
+
+	getCenterPosition() {
+		const ground = State.ground;
+		this.position.x = ground.x(0.5);
+		this.position.y = ground.y(0.5);
+	}
+
+	getRandomPosition() {
+		const ground = State.ground;
+		this.position.x = ground.x(Math.random());
+		this.position.y = ground.y(Math.random());
+		if (!ground.isInside(this)) {
+			this.getRandomPosition();
+		}
 	}
 
 	update() {

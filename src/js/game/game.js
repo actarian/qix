@@ -32,27 +32,48 @@ export default class Game {
 		this.loop = this.loop.bind(this);
 		this.onKeydown = this.onKeydown.bind(this);
 		this.onKeyup = this.onKeyup.bind(this);
+		State.addEnemy = this.addEnemy.bind(this);
+		State.removeEnemy = this.removeEnemy.bind(this);
+		State.addScore = this.addScore.bind(this);
 		document.addEventListener("keydown", this.onKeydown);
 		document.addEventListener("keyup", this.onKeyup);
 	}
 
 	start() {
 		State.area = 0;
+		State.addEnemy();
 		this.loop();
-		this.addMoreEnemy();
 	}
 
-	addMoreEnemy() {
+	addEnemy() {
 		if (this.to) {
 			clearTimeout(this.to);
 		}
 		const add = () => {
+			console.log('addEnemy');
 			if (!State.ended && !State.paused) {
-				State.enemies.push(new Enemy());
-				this.addMoreEnemy();
+				if (State.enemies.length < State.maxEnemies) {
+					State.enemies.push(new Enemy());
+				}
+				this.addEnemy();
 			}
 		};
 		this.to = setTimeout(add, 10000);
+	}
+
+	removeEnemy(enemy) {
+		console.log('removeEnemy', enemy);
+		if (!State.ended && !State.paused) {
+			const index = State.enemies.indexOf(enemy);
+			if (index !== -1) {
+				State.enemies.splice(index, 1);
+			}
+		}
+	}
+
+	addScore(score) {
+		console.log('addScore', score);
+		State.score += score;
 	}
 
 	loop() {
@@ -111,7 +132,7 @@ export default class Game {
 		if (State.paused) {
 			State.paused = false;
 			this.loop();
-			this.addMoreEnemy();
+			this.addEnemy();
 		} else {
 			State.paused = true;
 		}

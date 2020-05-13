@@ -79,11 +79,6 @@ export default class Ground extends Polygon {
 				points.push(points[0]);
 				this.rebuild(points);
 			}
-			State.area = this.getArea();
-			State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100);
-			console.log('State', State.area, State.percent);
-			const bar = document.querySelector('.progress__bar');
-			gsap.set(bar, { width: `${State.percent}%` });
 		}
 	}
 

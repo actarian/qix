@@ -67,7 +67,12 @@ export default class Polygon {
 		}, false);
 	}
 
-	inside(actor) {
+	isInside(actor) {
+		const points = this.getPoints();
+		return this.isPointInside(actor.position, points);
+	}
+
+	willBeInside(actor) {
 		const points = this.getPoints();
 		return this.isPointInside(actor.segment.b, points);
 	}

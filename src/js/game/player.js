@@ -92,7 +92,7 @@ export default class Player {
 		let hitted;
 		if (this.active && (this.direction.x || this.direction.y)) {
 			if (hitted = ground.hit(this, 2)) {
-				console.log('hitted');
+				// console.log('hitted');
 				if (hitted instanceof Segment && cut.segments.length) {
 					const i = hitted.getIntersection(this.segment);
 					if (i && (i.intersectA || i.intersectB)) {
@@ -106,12 +106,28 @@ export default class Player {
 					this.currentSegment = hitted;
 					this.direction.x = 0;
 					this.direction.y = 0;
-					console.log('cut.segments.length', cut.segments.length);
+					// console.log('cut.segments.length', cut.segments.length);
 					ground.remove(cut, this.firstSegment, this.lastSegment);
+					// update score and enemies
+					State.enemies.forEach(enemy => {
+						if (!ground.isInside(enemy)) {
+							State.removeEnemy(enemy);
+							State.addScore(500);
+						}
+					});
+					State.area = ground.getArea();
+					State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100);
+					// console.log('State', State.area, State.percent);
+					const bar = document.querySelector('.progress__bar');
+					gsap.set(bar, { width: `${State.percent}%` });
+					const area = cut.getArea();
+					const score = Math.round(Math.sqrt(area));
+					State.addScore(score);
+					//
 					cut.segments = [];
 				}
-			} else if (!ground.inside(this)) {
-				console.log('outside');
+			} else if (!ground.willBeInside(this)) {
+				// console.log('outside');
 				this.direction.x = 0;
 				this.direction.y = 0;
 			} else if (cut.hitSegments(this, 3)) {
