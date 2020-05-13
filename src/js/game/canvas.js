@@ -35,6 +35,22 @@ export default class Canvas {
 		ctx.stroke();
 	}
 
+	drawImage(image, x, y, scale, rotation) {
+		const ctx = this.ctx;
+		ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
+		ctx.rotate(rotation);
+		ctx.drawImage(image, -image.naturalWidth / 2, -image.naturalWidth / 2);
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+	}
+
+	drawImageCenter(image, x, y, cx, cy, scale, rotation) {
+		const ctx = this.ctx;
+		ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
+		ctx.rotate(rotation);
+		ctx.drawImage(image, -cx, -cy);
+		ctx.setTransform(1, 0, 0, 1, 0, 0);
+	}
+
 	/*
 	resize() {
 		const canvas = this.canvas;

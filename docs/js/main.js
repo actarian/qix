@@ -368,6 +368,22 @@
 	    ctx.stroke();
 	  };
 
+	  _proto.drawImage = function drawImage(image, x, y, scale, rotation) {
+	    var ctx = this.ctx;
+	    ctx.setTransform(scale, 0, 0, scale, x, y);
+	    ctx.rotate(rotation);
+	    ctx.drawImage(image, -image.naturalWidth / 2, -image.naturalWidth / 2);
+	    ctx.setTransform(1, 0, 0, 1, 0, 0);
+	  };
+
+	  _proto.drawImageCenter = function drawImageCenter(image, x, y, cx, cy, scale, rotation) {
+	    var ctx = this.ctx;
+	    ctx.setTransform(scale, 0, 0, scale, x, y);
+	    ctx.rotate(rotation);
+	    ctx.drawImage(image, -cx, -cy);
+	    ctx.setTransform(1, 0, 0, 1, 0, 0);
+	  };
+
 	  return Canvas;
 	}();
 
@@ -1130,12 +1146,18 @@
 	  _proto.draw = function draw() {
 	    var canvas = State.canvas;
 	    var ctx = canvas.ctx;
-	    ctx.beginPath();
-	    ctx.strokeStyle = "black";
-	    ctx.arc(this.position.x, this.position.y, 5, 0, 2 * Math.PI, true);
-	    ctx.stroke();
-	    ctx.fillStyle = "green";
-	    ctx.fill();
+	    var diamond = State.resources.get(State.assets.diamond);
+	    canvas.drawImage(diamond, this.position.x, this.position.y, 1, this.getOrientation() === 0 ? Math.PI / 2 : 0);
+	  };
+
+	  _proto.getOrientation = function getOrientation() {
+	    var o = 0;
+
+	    if (this.currentSegment && Math.abs(this.currentSegment.a.x - this.currentSegment.b.x) < 1) {
+	      o = 1;
+	    }
+
+	    return o;
 	  };
 
 	  _proto.checkDirection = function checkDirection() {
@@ -1186,6 +1208,7 @@
 	          _segment.b.x = this.position.x;
 	          _segment.b.y = this.position.y;
 	          this.lastSegment = hitted;
+	          this.currentSegment = hitted;
 	          this.direction.x = 0;
 	          this.direction.y = 0;
 	          console.log('cut.segments.length', cut.segments.length);
@@ -1202,12 +1225,14 @@
 	        this.direction.y = 0;
 	      } else {
 	        cut.move(this);
+	        this.currentSegment = cut.segments[cut.segments.length - 1];
 	      }
 	    } else {
 	      hitted = ground.hit(this, 3);
 
 	      if (hitted) {
 	        this.firstSegment = hitted;
+	        this.currentSegment = hitted;
 	      } else {
 	        this.direction.x = 0;
 	        this.direction.y = 0;

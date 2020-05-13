@@ -28,15 +28,38 @@ export default class Player {
 	}
 
 	draw() {
-		const ground = State.ground;
+		// const ground = State.ground;
 		const canvas = State.canvas;
 		const ctx = canvas.ctx;
+		const diamond = State.resources.get(State.assets.diamond);
+		/*
+		ctx.save();
+		ctx.translate(this.position.x, this.position.y);
+		if (this.getOrientation() === 1) {
+			ctx.rotate(Math.PI / 2);
+		}
+		ctx.drawImage(diamond, -diamond.naturalWidth / 2 + 100, -diamond.naturalHeight / 2);
+		ctx.restore();
+		*/
+
+		canvas.drawImage(diamond, this.position.x, this.position.y, 1, this.getOrientation() === 0 ? Math.PI / 2 : 0);
+
+		/*
 		ctx.beginPath();
 		ctx.strokeStyle = "black";
 		ctx.arc(this.position.x, this.position.y, 5, 0, 2 * Math.PI, true);
 		ctx.stroke();
 		ctx.fillStyle = "green";
 		ctx.fill();
+		*/
+	}
+
+	getOrientation() {
+		let o = 0;
+		if (this.currentSegment && (Math.abs(this.currentSegment.a.x - this.currentSegment.b.x) < 1)) {
+			o = 1;
+		}
+		return o;
 	}
 
 	checkDirection() {
@@ -82,6 +105,7 @@ export default class Player {
 					segment.b.x = this.position.x;
 					segment.b.y = this.position.y;
 					this.lastSegment = hitted;
+					this.currentSegment = hitted;
 					this.direction.x = 0;
 					this.direction.y = 0;
 					console.log('cut.segments.length', cut.segments.length);
@@ -98,11 +122,13 @@ export default class Player {
 				this.direction.y = 0;
 			} else {
 				cut.move(this);
+				this.currentSegment = cut.segments[cut.segments.length - 1];
 			}
 		} else {
 			hitted = ground.hit(this, 3);
 			if (hitted) {
 				this.firstSegment = hitted;
+				this.currentSegment = hitted;
 			} else {
 				this.direction.x = 0;
 				this.direction.y = 0;
