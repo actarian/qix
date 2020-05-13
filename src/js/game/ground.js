@@ -21,12 +21,12 @@ export default class Ground extends Polygon {
 			new Segment(rect.left, rect.bottom, rect.left, rect.top), // left
 		];
 		State.totalArea = this.getArea();
-		console.log('State.totalArea', State.totalArea);
+		// console.log('State.totalArea', State.totalArea);
 	}
 
 	remove(polygon, firstSegment, lastSegment) {
 		if (polygon.segments.length) {
-			console.log(firstSegment, lastSegment);
+			// console.log(firstSegment, lastSegment);
 			const i1 = this.segments.indexOf(firstSegment);
 			const i2 = this.segments.indexOf(lastSegment);
 			/*
@@ -56,9 +56,9 @@ export default class Ground extends Polygon {
 			}, -1);
 			*/
 			if (i1 !== -1 && i2 !== -1) {
-				console.log('close!', i1, i2);
+				// console.log('close!', i1, i2);
 				const cutPoints = polygon.getPoints(true);
-				console.log('cutPoints.length', cutPoints.length, polygon.segments.length);
+				// console.log('cutPoints.length', cutPoints.length, polygon.segments.length);
 				const min = Math.min(i1, i2);
 				const max = Math.max(i1, i2);
 				const points = [];
@@ -87,30 +87,32 @@ export default class Ground extends Polygon {
 		const ctx = canvas.ctx;
 		const packaging = State.resources.get(State.assets.packaging);
 		ctx.drawImage(packaging, 0, 0, packaging.naturalWidth, packaging.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
-		ctx.beginPath();
 		ctx.lineWidth = "3";
 		ctx.strokeStyle = "black";
-		const t = this.segments.length;
-		for (let i = 0; i < t; i++) {
-			const s = this.segments[i];
-			if (i === 0) {
-				ctx.moveTo(s.a.x, s.a.y);
-			} else {
-				ctx.lineTo(s.a.x, s.a.y);
+		if (!State.ended) {
+			ctx.beginPath();
+			const t = this.segments.length;
+			for (let i = 0; i < t; i++) {
+				const s = this.segments[i];
+				if (i === 0) {
+					ctx.moveTo(s.a.x, s.a.y);
+				} else {
+					ctx.lineTo(s.a.x, s.a.y);
+				}
+				/*
+				if (i === t - 1) {
+					ctx.lineTo(s.b.x, s.b.y);
+				}
+				*/
 			}
-			/*
-			if (i === t - 1) {
-				ctx.lineTo(s.b.x, s.b.y);
-			}
-			*/
+			ctx.closePath();
+			ctx.save();
+			ctx.clip();
+			const designer = State.resources.get(State.assets.designer);
+			ctx.drawImage(designer, 0, 0, designer.naturalWidth, designer.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+			ctx.restore();
+			ctx.stroke();
 		}
-		ctx.closePath();
-		ctx.save();
-		ctx.clip();
-		const designer = State.resources.get(State.assets.designer);
-		ctx.drawImage(designer, 0, 0, designer.naturalWidth, designer.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
-		ctx.restore();
-		ctx.stroke();
 		ctx.strokeRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height);
 		// ctx.fill();
 	}

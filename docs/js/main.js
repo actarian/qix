@@ -415,22 +415,20 @@
 	var inheritsLoose = _inheritsLoose;
 
 	var State = {
+	  paused: false,
 	  ended: false,
 	  won: false,
-	  paused: false,
-	  then: Date.now(),
-	  soundtrack: null,
-	  gameWon: null,
-	  gameLost: null,
-	  timer: 30,
-	  frameCount: 0,
+	  lost: false,
 	  keys: {},
 	  score: 0,
 	  area: 0,
 	  maxEnemies: 5,
 	  addEnemy: function addEnemy() {},
 	  removeEnemy: function removeEnemy() {},
-	  addPoints: function addPoints() {}
+	  addScore: function addScore() {},
+	  addEnemyScore: function addEnemyScore() {},
+	  onPlayerCut: function onPlayerCut() {},
+	  onPlayerReset: function onPlayerReset() {}
 	};
 
 	function _defineProperties(target, props) {
@@ -928,7 +926,7 @@
 	      this.getCenterPosition();
 	    }
 
-	    this.direction = new Vector2(0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1), 0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1)).normalize();
+	    this.getRandomDirection();
 	    this.speed = 3; // 2 + Math.random() * 2;
 
 	    this.segment = new Segment();
@@ -950,6 +948,10 @@
 	    if (!ground.isInside(this)) {
 	      this.getRandomPosition();
 	    }
+	  };
+
+	  _proto.getRandomDirection = function getRandomDirection() {
+	    this.direction = new Vector2(0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1), 0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1)).normalize();
 	  };
 
 	  _proto.update = function update() {
@@ -997,6 +999,12 @@
 	        // this.direction.y *= -1;
 	        this.direction.copy(bounce.d);
 	      }
+	      /*
+	      else if (Math.random() * 100 < 1) {
+	      	this.getRandomDirection();
+	      }
+	      */
+
 
 	      return bounce;
 	    }
@@ -1151,13 +1159,12 @@
 	    new Segment(rect.right, rect.bottom, rect.left, rect.bottom), // bottom
 	    new Segment(rect.left, rect.bottom, rect.left, rect.top) // left
 	    ];
-	    State.totalArea = this.getArea();
-	    console.log('State.totalArea', State.totalArea);
+	    State.totalArea = this.getArea(); // console.log('State.totalArea', State.totalArea);
 	  };
 
 	  _proto.remove = function remove(polygon, firstSegment, lastSegment) {
 	    if (polygon.segments.length) {
-	      console.log(firstSegment, lastSegment);
+	      // console.log(firstSegment, lastSegment);
 	      var i1 = this.segments.indexOf(firstSegment);
 	      var i2 = this.segments.indexOf(lastSegment);
 	      /*
@@ -1188,9 +1195,9 @@
 	      */
 
 	      if (i1 !== -1 && i2 !== -1) {
-	        console.log('close!', i1, i2);
-	        var cutPoints = polygon.getPoints(true);
-	        console.log('cutPoints.length', cutPoints.length, polygon.segments.length);
+	        // console.log('close!', i1, i2);
+	        var cutPoints = polygon.getPoints(true); // console.log('cutPoints.length', cutPoints.length, polygon.segments.length);
+
 	        var min = Math.min(i1, i2);
 	        var max = Math.max(i1, i2);
 	        var points = [];
@@ -1225,34 +1232,38 @@
 	    var ctx = canvas.ctx;
 	    var packaging = State.resources.get(State.assets.packaging);
 	    ctx.drawImage(packaging, 0, 0, packaging.naturalWidth, packaging.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
-	    ctx.beginPath();
 	    ctx.lineWidth = "3";
 	    ctx.strokeStyle = "black";
-	    var t = this.segments.length;
 
-	    for (var i = 0; i < t; i++) {
-	      var s = this.segments[i];
+	    if (!State.ended) {
+	      ctx.beginPath();
+	      var t = this.segments.length;
 
-	      if (i === 0) {
-	        ctx.moveTo(s.a.x, s.a.y);
-	      } else {
-	        ctx.lineTo(s.a.x, s.a.y);
+	      for (var i = 0; i < t; i++) {
+	        var s = this.segments[i];
+
+	        if (i === 0) {
+	          ctx.moveTo(s.a.x, s.a.y);
+	        } else {
+	          ctx.lineTo(s.a.x, s.a.y);
+	        }
+	        /*
+	        if (i === t - 1) {
+	        	ctx.lineTo(s.b.x, s.b.y);
+	        }
+	        */
+
 	      }
-	      /*
-	      if (i === t - 1) {
-	      	ctx.lineTo(s.b.x, s.b.y);
-	      }
-	      */
 
+	      ctx.closePath();
+	      ctx.save();
+	      ctx.clip();
+	      var designer = State.resources.get(State.assets.designer);
+	      ctx.drawImage(designer, 0, 0, designer.naturalWidth, designer.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+	      ctx.restore();
+	      ctx.stroke();
 	    }
 
-	    ctx.closePath();
-	    ctx.save();
-	    ctx.clip();
-	    var designer = State.resources.get(State.assets.designer);
-	    ctx.drawImage(designer, 0, 0, designer.naturalWidth, designer.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
-	    ctx.restore();
-	    ctx.stroke();
 	    ctx.strokeRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height); // ctx.fill();
 	  };
 
@@ -1366,9 +1377,9 @@
 	    var hitted;
 
 	    if (this.active && (this.direction.x || this.direction.y)) {
-	      if (hitted = ground.hit(this, 2)) {
-	        // console.log('hitted');
+	      if (hitted = ground.hit(this, 3)) {
 	        if (hitted instanceof Segment && cut.segments.length) {
+	          console.log('close');
 	          var i = hitted.getIntersection(this.segment);
 
 	          if (i && (i.intersectA || i.intersectB)) {
@@ -1384,36 +1395,24 @@
 	          this.direction.x = 0;
 	          this.direction.y = 0; // console.log('cut.segments.length', cut.segments.length);
 
-	          ground.remove(cut, this.firstSegment, this.lastSegment); // update score and enemies
-
-	          State.enemies.forEach(function (enemy) {
-	            if (!ground.isInside(enemy)) {
-	              State.removeEnemy(enemy);
-	              State.addScore(500);
-	            }
-	          });
-	          State.area = ground.getArea();
-	          State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100); // console.log('State', State.area, State.percent);
-
-	          var bar = document.querySelector('.progress__bar');
-	          gsap.set(bar, {
-	            width: State.percent + "%"
-	          });
-	          var area = cut.getArea();
-	          var score = Math.round(Math.sqrt(area));
-	          State.addScore(score); //
-
+	          ground.remove(cut, this.firstSegment, this.lastSegment);
+	          State.onPlayerCut();
 	          cut.segments = [];
+	        } else {
+	          this.firstSegment = hitted;
+	          this.currentSegment = hitted;
 	        }
-	      } else if (!ground.willBeInside(this)) {
-	        // console.log('outside');
-	        this.direction.x = 0;
-	        this.direction.y = 0;
 	      } else if (cut.hitSegments(this, 3)) {
 	        cut.reset(this);
 	        this.direction.x = 0;
 	        this.direction.y = 0;
+	        State.onPlayerReset();
+	      } else if (!ground.willBeInside(this)) {
+	        // console.log('outside');
+	        this.direction.x = 0;
+	        this.direction.y = 0;
 	      } else {
+	        console.log('segment');
 	        cut.move(this);
 	        this.currentSegment = cut.segments[cut.segments.length - 1];
 	      }
@@ -1534,17 +1533,85 @@
 	    this.loop = this.loop.bind(this);
 	    this.onKeydown = this.onKeydown.bind(this);
 	    this.onKeyup = this.onKeyup.bind(this);
+	    this.restart = this.restart.bind(this);
 	    State.addEnemy = this.addEnemy.bind(this);
 	    State.removeEnemy = this.removeEnemy.bind(this);
 	    State.addScore = this.addScore.bind(this);
+	    State.addEnemyScore = this.addEnemyScore.bind(this);
+	    State.onPlayerCut = this.onPlayerCut.bind(this);
+	    State.onPlayerReset = this.onPlayerReset.bind(this);
 	    document.addEventListener("keydown", this.onKeydown);
 	    document.addEventListener("keyup", this.onKeyup);
+	    var restart = document.querySelector('.btn--restart');
+	    restart.addEventListener("click", this.restart);
 	  };
 
 	  _proto.start = function start() {
 	    State.area = 0;
 	    State.addEnemy();
 	    this.loop();
+	  };
+
+	  _proto.restart = function restart() {
+	    var container = document.querySelector('.game-container');
+	    container.classList.remove('game-container--ended');
+	    State.ground = new Ground();
+	    State.cut = new Cut();
+	    State.enemies = new Array(1).fill(0).map(function (x) {
+	      return new Enemy();
+	    });
+	    State.player = new Player();
+	    State.area = 0;
+	    State.percent = 0;
+	    State.score = 0;
+	    State.paused = false;
+	    State.ended = false;
+	    State.won = false;
+	    State.lost = false;
+	    this.setPercent();
+	  };
+
+	  _proto.onPlayerCut = function onPlayerCut() {
+	    var ground = State.ground;
+	    var cut = State.cut; // update score and enemies
+
+	    var deads = State.enemies.filter(function (enemy) {
+	      return !ground.isInside(enemy);
+	    });
+	    deads.forEach(function (enemy) {
+	      State.removeEnemy(enemy);
+	      State.addEnemyScore(enemy);
+	    });
+	    State.area = ground.getArea();
+	    State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100);
+
+	    if (State.percent >= 75) {
+	      State.percent = 100;
+	      State.ended = true;
+	      State.won = true;
+	      var container = document.querySelector('.game-container');
+	      container.classList.add('game-container--ended');
+	    }
+
+	    this.setPercent();
+	    var area = cut.getArea();
+	    var score = Math.round(Math.sqrt(area));
+	    State.addScore(score);
+	  };
+
+	  _proto.setPercent = function setPercent() {
+	    var percent = State.percent + "%"; // console.log('State', State.area, State.percent);
+
+	    var bar = document.querySelector('.progress__bar');
+	    gsap.set(bar, {
+	      width: percent
+	    });
+	    var progress = document.querySelector('.group--progress .percent');
+	    progress.innerText = percent;
+	  };
+
+	  _proto.onPlayerReset = function onPlayerReset() {
+	    State.keys.space = state.keys.shift = false;
 	  };
 
 	  _proto.addEnemy = function addEnemy() {
@@ -1571,24 +1638,26 @@
 
 	  _proto.removeEnemy = function removeEnemy(enemy) {
 	    console.log('removeEnemy', enemy);
+	    var index = State.enemies.indexOf(enemy);
 
-	    if (!State.ended && !State.paused) {
-	      var index = State.enemies.indexOf(enemy);
-
-	      if (index !== -1) {
-	        State.enemies.splice(index, 1);
-	      }
+	    if (index !== -1) {
+	      State.enemies.splice(index, 1);
 	    }
 	  };
 
+	  _proto.addEnemyScore = function addEnemyScore(enemy) {
+	    State.score += 500;
+	    console.log('addEnemyScore', enemy, State.score);
+	  };
+
 	  _proto.addScore = function addScore(score) {
-	    console.log('addScore', score);
 	    State.score += score;
+	    console.log('addScore', score);
 	  };
 
 	  _proto.loop = function loop() {
-	    if (!State.ended) {
-	      if (!State.paused) {
+	    if (!State.paused) {
+	      if (!State.ended) {
 	        State.canvas.update();
 	        State.ground.update();
 	        State.cut.update();
@@ -1596,23 +1665,12 @@
 	          return x.update();
 	        });
 	        State.player.update();
-	        /*
-	        this.grid.paint();
-	        this.player.update();
-	        this.player.paint();
-	        this.grid.enemies.forEach((enemy) => {
-	            enemy.update();
-	            enemy.paint();
-	        });
-	        this.qix.update();
-	        this.qix.draw();
-	        this.measureFPS();
-	        this.grid.displayScore();
-	        this.grid.displayTimer();
-	        */
-
-	        requestAnimationFrame(this.loop);
+	      } else {
+	        State.canvas.update();
+	        State.ground.draw();
 	      }
+
+	      requestAnimationFrame(this.loop);
 	    }
 	  };
 

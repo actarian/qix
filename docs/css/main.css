@@ -1,5 +1,17 @@
-body {
+.page-template-splendidi-splendenti {
   background: black; }
+  .page-template-splendidi-splendenti .group--popup {
+    display: block !important;
+    pointer-events: all; }
+  .page-template-splendidi-splendenti div,
+  .page-template-splendidi-splendenti a,
+  .page-template-splendidi-splendenti span,
+  .page-template-splendidi-splendenti button {
+    cursor: default !important; }
+  .page-template-splendidi-splendenti a,
+  .page-template-splendidi-splendenti button,
+  .page-template-splendidi-splendenti .btn--cta {
+    cursor: pointer !important; }
 
 .game-container {
   position: fixed;
@@ -11,33 +23,98 @@ body {
   padding: 40px;
   background: #3b6d4e;
   border: 3px solid black;
-  box-sizing: border-box; }
+  box-sizing: border-box;
+  font-family: 'Marker Felt', sans-serif; }
   .game-container > .left,
   .game-container > .right {
     flex: 0 0 20%;
     min-width: 20%;
     display: flex;
     flex-direction: column; }
+    .game-container > .left .group--head,
+    .game-container > .left .group--foot,
+    .game-container > .right .group--head,
+    .game-container > .right .group--foot {
+      display: flex;
+      flex: 0 0 55px;
+      min-height: 55px; }
+    .game-container > .left .group--main,
+    .game-container > .right .group--main {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center; }
+      .game-container > .left .group--main .group--cta,
+      .game-container > .right .group--main .group--cta {
+        padding: 0;
+        display: flex;
+        flex-direction: column; }
+        .game-container > .left .group--main .group--cta > .btn--cta,
+        .game-container > .right .group--main .group--cta > .btn--cta {
+          padding: 14px 14px; }
+          .game-container > .left .group--main .group--cta > .btn--cta:last-child,
+          .game-container > .right .group--main .group--cta > .btn--cta:last-child {
+            background: #e01e25;
+            color: white; }
+        .game-container > .left .group--main .group--cta > .btn--cta + .btn--cta,
+        .game-container > .right .group--main .group--cta > .btn--cta + .btn--cta {
+          margin-top: 20px; }
   .game-container > .left {
     justify-content: center; }
+  .game-container > .right .group--head {
+    display: flex;
+    justify-content: flex-end; }
+    .game-container > .right .group--head .btn--close {
+      margin-bottom: 0; }
   .game-container > .center {
     flex: 1 1 auto;
     display: flex;
     justify-content: center;
     align-items: center; }
+  .game-container:not(.game-container--ended) .group--splendid,
+  .game-container:not(.game-container--ended) .group--cta {
+    display: none !important; }
+
+.group--splendid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 0 60px 0; }
+
+.group--progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  color: white;
+  line-height: 1; }
+  .group--progress .percent {
+    font-size: 16px;
+    text-align: right; }
 
 .progress {
   position: relative;
-  width: 100%;
-  height: 10px;
-  background: white; }
+  width: calc(100% - 50px);
+  max-width: 200px;
+  height: 16px;
+  background: white;
+  border-radius: 6px;
+  border: 3px solid black;
+  box-sizing: border-box;
+  box-shadow: 0 6px 0 -5px black; }
   .progress__bar {
     position: absolute;
     top: 0;
     left: 0;
     height: 100%;
     width: 0;
-    background: red; }
+    background: black url(../img/game/progress.png) repeat-x;
+    background-size: auto 100%;
+    animation: background-animation;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite; }
 
 .game {
   width: 100%;
@@ -61,4 +138,10 @@ body {
       width: 100%;
       height: 100%;
       object-fit: cover; }
+
+@keyframes background-animation {
+  from {
+    background-position: 0px 0%; }
+  to {
+    background-position: 50px 0%; } }
 /*# sourceMappingURL=main.css.map */

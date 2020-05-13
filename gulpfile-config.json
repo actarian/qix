@@ -35,7 +35,7 @@
     "root": "./docs",
     "path": "/qix/",
     "host": "0.0.0.0",
-    "port": 40111,
+    "port": 40099,
     "log": false
   }
 }

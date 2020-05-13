@@ -19,7 +19,7 @@ export default class Enemy {
 		} else {
 			this.getCenterPosition();
 		}
-		this.direction = new Vector2(0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1), 0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1)).normalize();
+		this.getRandomDirection();
 		this.speed = 3; // 2 + Math.random() * 2;
 		this.segment = new Segment();
 	}
@@ -37,6 +37,10 @@ export default class Enemy {
 		if (!ground.isInside(this)) {
 			this.getRandomPosition();
 		}
+	}
+
+	getRandomDirection() {
+		this.direction = new Vector2(0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1), 0.5 + Math.random() * 0.5 * (Math.random() > 0.5 ? 1 : -1)).normalize();
 	}
 
 	update() {
@@ -84,6 +88,11 @@ export default class Enemy {
 				// this.direction.y *= -1;
 				this.direction.copy(bounce.d);
 			}
+			/*
+			else if (Math.random() * 100 < 1) {
+				this.getRandomDirection();
+			}
+			*/
 			return bounce;
 		}
 	}

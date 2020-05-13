@@ -32,17 +32,77 @@ export default class Game {
 		this.loop = this.loop.bind(this);
 		this.onKeydown = this.onKeydown.bind(this);
 		this.onKeyup = this.onKeyup.bind(this);
+		this.restart = this.restart.bind(this);
 		State.addEnemy = this.addEnemy.bind(this);
 		State.removeEnemy = this.removeEnemy.bind(this);
 		State.addScore = this.addScore.bind(this);
+		State.addEnemyScore = this.addEnemyScore.bind(this);
+		State.onPlayerCut = this.onPlayerCut.bind(this);
+		State.onPlayerReset = this.onPlayerReset.bind(this);
 		document.addEventListener("keydown", this.onKeydown);
 		document.addEventListener("keyup", this.onKeyup);
+		const restart = document.querySelector('.btn--restart');
+		restart.addEventListener("click", this.restart);
 	}
 
 	start() {
 		State.area = 0;
 		State.addEnemy();
 		this.loop();
+	}
+
+	restart() {
+		const container = document.querySelector('.game-container');
+		container.classList.remove('game-container--ended');
+		State.ground = new Ground();
+		State.cut = new Cut();
+		State.enemies = new Array(1).fill(0).map(x => new Enemy());
+		State.player = new Player();
+		State.area = 0;
+		State.percent = 0;
+		State.score = 0;
+		State.paused = false;
+		State.ended = false;
+		State.won = false;
+		State.lost = false;
+		this.setPercent();
+	}
+
+	onPlayerCut() {
+		const ground = State.ground;
+		const cut = State.cut;
+		// update score and enemies
+		const deads = State.enemies.filter(enemy => !ground.isInside(enemy));
+		deads.forEach(enemy => {
+			State.removeEnemy(enemy);
+			State.addEnemyScore(enemy);
+		});
+		State.area = ground.getArea();
+		State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100);
+		if (State.percent >= 75) {
+			State.percent = 100;
+			State.ended = true;
+			State.won = true;
+			const container = document.querySelector('.game-container');
+			container.classList.add('game-container--ended');
+		}
+		this.setPercent();
+		const area = cut.getArea();
+		const score = Math.round(Math.sqrt(area));
+		State.addScore(score);
+	}
+
+	setPercent() {
+		const percent = `${State.percent}%`;
+		// console.log('State', State.area, State.percent);
+		const bar = document.querySelector('.progress__bar');
+		gsap.set(bar, { width: percent });
+		const progress = document.querySelector('.group--progress .percent');
+		progress.innerText = percent;
+	}
+
+	onPlayerReset() {
+		State.keys.space = state.keys.shift = false;
 	}
 
 	addEnemy() {
@@ -63,68 +123,40 @@ export default class Game {
 
 	removeEnemy(enemy) {
 		console.log('removeEnemy', enemy);
-		if (!State.ended && !State.paused) {
-			const index = State.enemies.indexOf(enemy);
-			if (index !== -1) {
-				State.enemies.splice(index, 1);
-			}
+		const index = State.enemies.indexOf(enemy);
+		if (index !== -1) {
+			State.enemies.splice(index, 1);
 		}
 	}
 
+	addEnemyScore(enemy) {
+		State.score += 500;
+		console.log('addEnemyScore', enemy, State.score);
+	}
+
 	addScore(score) {
-		console.log('addScore', score);
 		State.score += score;
+		console.log('addScore', score);
 	}
 
 	loop() {
-		if (!State.ended) {
-			if (!State.paused) {
+		if (!State.paused) {
+			if (!State.ended) {
 				State.canvas.update();
 				State.ground.update();
 				State.cut.update();
 				State.enemies.forEach(x => x.update());
 				State.player.update();
-				/*
-				this.grid.paint();
-				this.player.update();
-				this.player.paint();
-				this.grid.enemies.forEach((enemy) => {
-				    enemy.update();
-				    enemy.paint();
-				});
-				this.qix.update();
-				this.qix.draw();
-				this.measureFPS();
-				this.grid.displayScore();
-				this.grid.displayTimer();
-				*/
-				requestAnimationFrame(this.loop);
-			}
-		} else {
-			// State.soundtrack.pause();
-			if (State.won) {
-				/*
-				State.gameWon.play();
-				this.grid.ctx.font = "150px Georgia";
-				this.grid.ctx.strokeStyle = 'white';
-				this.grid.ctx.lineWidth = 8;
-				this.grid.ctx.strokeText("Victory!", 80, 280);
-				this.grid.ctx.fillStyle = 'green';
-				this.grid.ctx.fillText("Victory!", 80, 280);
-				*/
 			} else {
-				/*
-				State.gameLost.play();
-				this.grid.ctx.font = "150px Georgia";
-				this.grid.ctx.strokeStyle = 'white';
-				this.grid.ctx.lineWidth = 8;
-				this.grid.ctx.strokeText("Game", 140, 200);
-				this.grid.ctx.strokeText("Over", 175, 350);
-				this.grid.ctx.fillStyle = 'red';
-				this.grid.ctx.fillText("Game", 140, 200);
-				this.grid.ctx.fillText("Over", 175, 350);
-				*/
+				State.canvas.update();
+				State.ground.draw();
+				if (State.won) {
+
+				} else {
+
+				}
 			}
+			requestAnimationFrame(this.loop);
 		}
 	}
 
