@@ -1324,10 +1324,10 @@
 	    });
 	    var player = State.player = new Player();
 	    var assets = State.assets = {
-	      designer: '/img/game/designer.jpg',
-	      packaging: '/img/game/packaging.jpg',
-	      mouth: '/img/game/mouth.png',
-	      diamond: '/img/game/diamond.png'
+	      designer: './img/game/designer.jpg',
+	      packaging: './img/game/packaging.jpg',
+	      mouth: './img/game/mouth.png',
+	      diamond: './img/game/diamond.png'
 	    };
 	    var resources = State.resources = Resources;
 	    Resources.onReady(function () {

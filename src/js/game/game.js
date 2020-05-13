@@ -15,10 +15,10 @@ export default class Game {
 		const enemies = State.enemies = new Array(3).fill(0).map(x => new Enemy());
 		const player = State.player = new Player();
 		const assets = State.assets = {
-			designer: '/img/game/designer.jpg',
-			packaging: '/img/game/packaging.jpg',
-			mouth: '/img/game/mouth.png',
-			diamond: '/img/game/diamond.png',
+			designer: './img/game/designer.jpg',
+			packaging: './img/game/packaging.jpg',
+			mouth: './img/game/mouth.png',
+			diamond: './img/game/diamond.png',
 		};
 		const resources = State.resources = Resources;
 		Resources.onReady(() => {
