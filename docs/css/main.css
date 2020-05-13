@@ -19,8 +19,8 @@ body {
     align-items: center; }
 
 .game {
-  width: calc(100vh - 120px);
-  height: calc(100vh - 120px);
+  width: 100%;
+  max-width: calc(100vh - 120px);
   box-sizing: border-box; }
   .game > .inner {
     position: relative;
