@@ -1,6 +1,5 @@
-import PolyBool from 'polybooljs';
+import { State } from '../state';
 import Segment from './segment';
-import { State } from './state';
 
 export default class Polygon {
 
@@ -15,26 +14,6 @@ export default class Polygon {
 		}
 	}
 
-	boolean(points) {
-		const poly1 = { regions: [this.getPoints().map(p => [p.x, p.y])] };
-		// const poly2 = { regions: [polygon.getPoints().map(p => [p.x, p.y])] };
-		const poly2 = { regions: [points] };
-		const operation = PolyBool.difference(poly1, poly2); // poly1 - poly2
-		console.log('segments', this.segments);
-		const segments = [];
-		operation.regions.forEach(points => {
-			points.forEach((p, i) => {
-				if (i < points.length - 2) {
-					segments.push(new Segment(p[0], p[1], points[i + 1][0], points[i + 1][1]));
-				} else {
-					segments.push(new Segment(p[0], p[1], points[0][0], points[0][1]));
-				}
-			});
-		});
-		this.segments = segments;
-		console.log('segments', segments);
-	}
-
 	rebuild(points) {
 		const segments = [];
 		for (let i = 0; i < points.length - 1; i++) {
@@ -46,9 +25,17 @@ export default class Polygon {
 	}
 
 	hit(actor, tolerance) {
+		for (let i = 0; i < this.segments.length; i++) {
+			const s = this.segments[i].hit(actor, tolerance);
+			if (s) {
+				return s;
+			}
+		}
+		/*
 		return this.segments.reduce((p, c) => {
 			return p || c.hit(actor, tolerance);
 		}, false);
+		*/
 	}
 
 	hitSegments(actor, tolerance) {

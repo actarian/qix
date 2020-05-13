@@ -1,53 +1,55 @@
 const cache = {};
-const loading = [];
 const callbacks = [];
 
 export default class Resources {
 
-    // Load an image url or an array of image urls
-    static load(urlOrArr) {
-        if (urlOrArr instanceof Array) {
-            urlOrArr.forEach((url) => {
-                Resources.loadUrl(url);
-            });
-        } else {
-            Resources.loadUrl(urlOrArr);
-        }
-    }
+	static loadAssets(assets) {
+		this.load(Object.keys(assets).map(k => assets[k]));
+	}
 
-    static loadUrl(url) {
-        if (cache[url]) {
-            return cache[url];
-        } else {
-            var img = new Image();
-            img.onload = () => {
-                cache[url] = img;
-                if (Resources.isReady()) {
-                    callbacks.forEach((callback) => {
-                        callback();
-                    });
-                }
-            };
-            cache[url] = false;
-            img.src = url;
-        }
-    }
+	static load(urlOrArr) {
+		if (urlOrArr instanceof Array) {
+			urlOrArr.forEach((url) => {
+				Resources.loadUrl(url);
+			});
+		} else {
+			Resources.loadUrl(urlOrArr);
+		}
+	}
 
-    static get(url) {
-        return cache[url];
-    }
+	static loadUrl(url) {
+		if (cache[url]) {
+			return cache[url];
+		} else {
+			var image = new Image();
+			image.onload = () => {
+				cache[url] = image;
+				if (Resources.isReady()) {
+					callbacks.forEach((callback) => {
+						callback();
+					});
+				}
+			};
+			cache[url] = false;
+			image.src = url;
+		}
+	}
 
-    static isReady() {
-        var ready = true;
-        for (var k in cache) {
-            if (cache.hasOwnProperty(k) && !cache[k]) {
-                ready = false;
-            }
-        }
-        return ready;
-    }
+	static get(url) {
+		return cache[url];
+	}
 
-    static onReady(callback) {
-        callbacks.push(callback);
-    }
+	static isReady() {
+		var ready = true;
+		for (var k in cache) {
+			if (cache.hasOwnProperty(k) && !cache[k]) {
+				ready = false;
+			}
+		}
+		return ready;
+	}
+
+	static onReady(callback) {
+		callbacks.push(callback);
+	}
 }

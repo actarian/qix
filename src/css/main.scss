@@ -26,18 +26,31 @@ body {
 
 .game-container {
 	position: fixed;
+	display: flex;
 	top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
 	padding: 60px;
+	background: #3b6d4e;
+	border: 3px solid black;
+	box-sizing: border-box;
+
+	&>.center {
+		flex: 1 1 auto;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
 }
 
 .game {
-	@include aspect-clip(4, 3);
-}
-
-.canvas {
-	border: 1px solid red;
+	width: calc(100vh - 120px);
+	height: calc(100vh - 120px);
 	box-sizing: border-box;
+
+	&>.inner {
+		@include aspect-clip(1, 1);
+	}
+
 }

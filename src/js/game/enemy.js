@@ -1,6 +1,6 @@
-import Segment from './segment';
+import Segment from './geometry/segment';
+import Vector2 from './geometry/vector2';
 import { State } from './state';
-import Vector2 from './vector2';
 
 export default class Enemy {
 
@@ -30,12 +30,16 @@ export default class Enemy {
 	draw() {
 		const canvas = State.canvas;
 		const ctx = canvas.ctx;
+		const mouth = State.resources.get(State.assets.mouth);
+		ctx.drawImage(mouth, this.position.x - mouth.naturalWidth / 2, this.position.y - mouth.naturalHeight / 2);
+		/*
 		ctx.beginPath();
 		ctx.strokeStyle = "black";
 		ctx.arc(this.position.x, this.position.y, 5, 0, 2 * Math.PI, true);
 		ctx.stroke();
 		ctx.fillStyle = "red";
 		ctx.fill();
+		*/
 	}
 
 	checkCollision() {
@@ -43,10 +47,14 @@ export default class Enemy {
 		const cut = State.cut;
 		const nx = this.nx;
 		const ny = this.ny;
+		const mouth = State.resources.get(State.assets.mouth);
 		const segment = this.segment;
 		segment.a.set(this.position.x, this.position.y);
-		segment.b.set(nx, ny);
-		if (cut.hit(this, 5)) {
+		segment.b.set(
+			this.position.x + this.direction.x * (mouth.naturalHeight / 2 + this.speed),
+			this.position.y + this.direction.y * (mouth.naturalHeight / 2 + this.speed),
+		);
+		if (cut.hit(this, mouth.naturalHeight / 2)) {
 			const player = State.player;
 			cut.reset(player);
 		} else {

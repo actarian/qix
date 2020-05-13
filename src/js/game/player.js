@@ -1,6 +1,6 @@
-import Segment from './segment';
+import Segment from './geometry/segment';
+import Vector2 from './geometry/vector2';
 import { State } from './state';
-import Vector2 from './vector2';
 
 export default class Player {
 
@@ -78,19 +78,14 @@ export default class Player {
 						this.position.x = i.x;
 						this.position.y = i.y;
 					}
-					this.lastSegment = hitted;
-					// console.log('i', i);
 					const segment = cut.segments[cut.segments.length - 1];
-					nx = this.nx;
-					ny = this.ny;
-					segment.b.x = nx;
-					segment.b.y = ny;
-					// this.position.x = nx;
-					// this.position.y = ny;
+					segment.b.x = this.position.x;
+					segment.b.y = this.position.y;
+					this.lastSegment = hitted;
 					this.direction.x = 0;
 					this.direction.y = 0;
 					console.log('cut.segments.length', cut.segments.length);
-					ground.remove(cut);
+					ground.remove(cut, this.firstSegment, this.lastSegment);
 					cut.segments = [];
 				}
 			} else if (!ground.inside(this)) {
@@ -106,8 +101,9 @@ export default class Player {
 			}
 		} else {
 			hitted = ground.hit(this, 3);
-			this.firstSegment = hitted;
-			if (!hitted) {
+			if (hitted) {
+				this.firstSegment = hitted;
+			} else {
 				this.direction.x = 0;
 				this.direction.y = 0;
 			}

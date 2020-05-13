@@ -1,6 +1,6 @@
-import Polygon from './polygon';
-import Rect from './rect';
-import Segment from './segment';
+import Polygon from './geometry/polygon';
+import Rect from './geometry/rect';
+import Segment from './geometry/segment';
 import { State } from './state';
 
 export default class Ground extends Polygon {
@@ -22,8 +22,12 @@ export default class Ground extends Polygon {
 		];
 	}
 
-	remove(polygon) {
+	remove(polygon, firstSegment, lastSegment) {
 		if (polygon.segments.length) {
+			console.log(firstSegment, lastSegment);
+			const i1 = this.segments.indexOf(firstSegment);
+			const i2 = this.segments.indexOf(lastSegment);
+			/*
 			const i1 = this.segments.reduce((p, c, i) => {
 				const s = polygon.segments[0];
 				const m = c.getIntersection(s);
@@ -48,6 +52,7 @@ export default class Ground extends Polygon {
 					return p;
 				}
 			}, -1);
+			*/
 			if (i1 !== -1 && i2 !== -1) {
 				console.log('close!', i1, i2);
 				const cutPoints = polygon.getPoints(true);
@@ -78,10 +83,11 @@ export default class Ground extends Polygon {
 	draw() {
 		const canvas = State.canvas;
 		const ctx = canvas.ctx;
+		const packaging = State.resources.get(State.assets.packaging);
+		ctx.drawImage(packaging, 0, 0, packaging.naturalWidth, packaging.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
 		ctx.beginPath();
-		ctx.lineWidth = "5";
-		ctx.strokeStyle = "green";
-		ctx.fillStyle = "black";
+		ctx.lineWidth = "3";
+		ctx.strokeStyle = "black";
 		const t = this.segments.length;
 		for (let i = 0; i < t; i++) {
 			const s = this.segments[i];
@@ -90,12 +96,21 @@ export default class Ground extends Polygon {
 			} else {
 				ctx.lineTo(s.a.x, s.a.y);
 			}
+			/*
 			if (i === t - 1) {
 				ctx.lineTo(s.b.x, s.b.y);
 			}
+			*/
 		}
+		ctx.closePath();
+		ctx.save();
+		ctx.clip();
+		const designer = State.resources.get(State.assets.designer);
+		ctx.drawImage(designer, 0, 0, designer.naturalWidth, designer.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+		ctx.restore();
 		ctx.stroke();
-		ctx.fill();
+		ctx.strokeRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+		// ctx.fill();
 	}
 
 	x(x) {

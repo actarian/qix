@@ -3,6 +3,7 @@ import Cut from './cut';
 import Enemy from './enemy';
 import Ground from './ground';
 import Player from './player';
+import Resources from './resources';
 import { State } from './state';
 
 export default class Game {
@@ -13,8 +14,17 @@ export default class Game {
 		const cut = this.cut = State.cut = new Cut();
 		const enemies = State.enemies = new Array(3).fill(0).map(x => new Enemy());
 		const player = State.player = new Player();
-		// this.loadAssets();
-		this.init();
+		const assets = State.assets = {
+			designer: '/img/game/designer.jpg',
+			packaging: '/img/game/packaging.jpg',
+			mouth: '/img/game/mouth.png',
+			diamond: '/img/game/diamond.png',
+		};
+		const resources = State.resources = Resources;
+		Resources.onReady(() => {
+			this.init();
+		});
+		Resources.loadAssets(assets);
 	}
 
 	init() {
