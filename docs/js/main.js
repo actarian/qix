@@ -803,8 +803,6 @@
 	    var canvas = State.canvas;
 	    var ctx = canvas.ctx;
 	    ctx.beginPath();
-	    ctx.lineWidth = "5";
-	    ctx.strokeStyle = "white";
 	    var t = this.segments.length;
 
 	    for (var i = 0; i < t; i++) {
@@ -821,6 +819,11 @@
 	      }
 	    }
 
+	    ctx.lineWidth = "7";
+	    ctx.strokeStyle = "black";
+	    ctx.stroke();
+	    ctx.lineWidth = "3";
+	    ctx.strokeStyle = "white";
 	    ctx.stroke();
 	  };
 

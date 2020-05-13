@@ -48,8 +48,6 @@ export default class Cut extends Polygon {
 		const canvas = State.canvas;
 		const ctx = canvas.ctx;
 		ctx.beginPath();
-		ctx.lineWidth = "5";
-		ctx.strokeStyle = "white";
 		const t = this.segments.length;
 		for (let i = 0; i < t; i++) {
 			const s = this.segments[i];
@@ -62,6 +60,11 @@ export default class Cut extends Polygon {
 				ctx.lineTo(s.b.x, s.b.y);
 			}
 		}
+		ctx.lineWidth = "7";
+		ctx.strokeStyle = "black";
+		ctx.stroke();
+		ctx.lineWidth = "3";
+		ctx.strokeStyle = "white";
 		ctx.stroke();
 	}
 
