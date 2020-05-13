@@ -2,9 +2,11 @@ import Vector2 from './geometry/vector2';
 
 export default class Canvas {
 
-	constructor() {
+	constructor(width, height) {
 		const canvas = this.canvas = document.querySelector('.game .canvas');
-		const size = this.size = new Vector2(canvas.offsetWidth, canvas.offsetHeight);
+		width = width || canvas.offsetWidth;
+		height = height || canvas.offsetHeight;
+		const size = this.size = new Vector2(width, height);
 		canvas.width = size.x;
 		canvas.height = size.y;
 		this.ctx = canvas.getContext('2d');

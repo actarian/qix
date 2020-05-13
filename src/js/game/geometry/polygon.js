@@ -14,6 +14,20 @@ export default class Polygon {
 		}
 	}
 
+	getArea() {
+		const points = this.getPoints();
+		let area = 0;
+		for (let i = 0, l = points.length; i < l; i++) {
+			const addX = points[i].x;
+			const addY = points[i == l - 1 ? 0 : i + 1].y;
+			const subX = points[i == l - 1 ? 0 : i + 1].x;
+			const subY = points[i].y;
+			area += (addX * addY * 0.5);
+			area -= (subX * subY * 0.5);
+		}
+		return Math.abs(area);
+	}
+
 	rebuild(points) {
 		const segments = [];
 		for (let i = 0; i < points.length - 1; i++) {

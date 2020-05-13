@@ -31,16 +31,44 @@ body {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	padding: 60px;
+	padding: 40px;
 	background: #3b6d4e;
 	border: 3px solid black;
 	box-sizing: border-box;
+
+	&>.left,
+	&>.right {
+		flex: 0 0 20%;
+		min-width: 20%;
+		display: flex;
+		flex-direction: column;
+	}
+
+	&>.left {
+		justify-content: center;
+	}
 
 	&>.center {
 		flex: 1 1 auto;
 		display: flex;
 		justify-content: center;
 		align-items: center;
+	}
+}
+
+.progress {
+	position: relative;
+	width: 100%;
+	height: 10px;
+	background: white;
+
+	&__bar {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		width: 0;
+		background: red;
 	}
 }
 
@@ -52,5 +80,4 @@ body {
 	&>.inner {
 		@include aspect-clip(1, 1);
 	}
-
 }

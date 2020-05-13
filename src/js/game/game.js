@@ -9,10 +9,10 @@ import { State } from './state';
 export default class Game {
 
 	constructor() {
-		const canvas = this.canvas = State.canvas = new Canvas();
+		const canvas = this.canvas = State.canvas = new Canvas(750, 750);
 		const ground = this.ground = State.ground = new Ground();
 		const cut = this.cut = State.cut = new Cut();
-		const enemies = State.enemies = new Array(3).fill(0).map(x => new Enemy());
+		const enemies = State.enemies = new Array(1).fill(0).map(x => new Enemy());
 		const player = State.player = new Player();
 		const assets = State.assets = {
 			designer: './img/game/designer.jpg',
@@ -23,6 +23,7 @@ export default class Game {
 		const resources = State.resources = Resources;
 		Resources.onReady(() => {
 			this.init();
+			this.start();
 		});
 		Resources.loadAssets(assets);
 	}
@@ -33,7 +34,25 @@ export default class Game {
 		this.onKeyup = this.onKeyup.bind(this);
 		document.addEventListener("keydown", this.onKeydown);
 		document.addEventListener("keyup", this.onKeyup);
+	}
+
+	start() {
+		State.area = 0;
 		this.loop();
+		this.addMoreEnemy();
+	}
+
+	addMoreEnemy() {
+		if (this.to) {
+			clearTimeout(this.to);
+		}
+		const add = () => {
+			if (!State.ended && !State.paused) {
+				State.enemies.push(new Enemy());
+				this.addMoreEnemy();
+			}
+		};
+		this.to = setTimeout(add, 10000);
 	}
 
 	loop() {
@@ -92,73 +111,58 @@ export default class Game {
 		if (State.paused) {
 			State.paused = false;
 			this.loop();
+			this.addMoreEnemy();
 		} else {
 			State.paused = true;
 		}
 	}
 
+	handleKeyCode(event) {
+		let keyCode = 'unknown';
+		switch (event.keyCode) {
+			case 32: // space
+				event.preventDefault();
+				keyCode = 'space';
+				break;
+			case 37: // left
+				event.preventDefault();
+				keyCode = 'left';
+				break;
+			case 38: // up
+				event.preventDefault();
+				keyCode = 'up';
+				break;
+			case 39: // right
+				event.preventDefault();
+				keyCode = 'right';
+				break;
+			case 40: // down
+				event.preventDefault();
+				keyCode = 'down';
+				break;
+		}
+		return keyCode;
+	}
+
 	onKeydown(event) {
 		const keys = State.keys;
-		Object.keys(keys).forEach(key => {
-			keys[key] = false;
-		});
+		event = event || window.event; // to deal with IE
 		keys.shift = event.shiftKey;
 		switch (event.keyCode) {
-			case 32:
-				event.preventDefault();
-				keys.space = true;
-				break;
-			case 37:
-				event.preventDefault();
-				keys.left = true;
-				break;
-			case 38:
-				event.preventDefault();
-				keys.up = true;
-				break;
-			case 39:
-				event.preventDefault();
-				keys.right = true;
-				break;
-			case 40:
-				event.preventDefault();
-				keys.down = true;
-				break;
-			case 112:
-				this.toggle();
-				break;
-			case 80:
+			case 112: // f1
+			case 80: // p
 				this.toggle();
 				break;
 			default:
+				keys[this.handleKeyCode(event)] = event.type == 'keydown';
 		}
 	}
 
 	onKeyup(event) {
 		const keys = State.keys;
-		switch (event.keyCode) {
-			case 32:
-				event.preventDefault();
-				keys.space = false;
-				break;
-			case 37:
-				event.preventDefault();
-				keys.left = false;
-				break;
-			case 38:
-				event.preventDefault();
-				keys.up = false;
-				break;
-			case 39:
-				event.preventDefault();
-				keys.right = false;
-				break;
-			case 40:
-				event.preventDefault();
-				keys.down = false;
-				break;
-			default:
-		}
+		event = event || window.event; // to deal with IE
+		keys.shift = event.shiftKey;
+		keys[this.handleKeyCode(event)] = event.type == 'keydown';
 	}
 
 }

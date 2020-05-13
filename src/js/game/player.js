@@ -30,9 +30,9 @@ export default class Player {
 	draw() {
 		// const ground = State.ground;
 		const canvas = State.canvas;
-		const ctx = canvas.ctx;
 		const diamond = State.resources.get(State.assets.diamond);
 		/*
+		const ctx = canvas.ctx;
 		ctx.save();
 		ctx.translate(this.position.x, this.position.y);
 		if (this.getOrientation() === 1) {
@@ -41,9 +41,7 @@ export default class Player {
 		ctx.drawImage(diamond, -diamond.naturalWidth / 2 + 100, -diamond.naturalHeight / 2);
 		ctx.restore();
 		*/
-
 		canvas.drawImage(diamond, this.position.x, this.position.y, 1, this.getOrientation() === 0 ? Math.PI / 2 : 0);
-
 		/*
 		ctx.beginPath();
 		ctx.strokeStyle = "black";

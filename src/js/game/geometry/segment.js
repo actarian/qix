@@ -1,5 +1,3 @@
-// import * as geometric from 'geometric';
-
 import Vector2 from "./vector2";
 
 export default class Segment {
@@ -138,7 +136,6 @@ export default class Segment {
 	}
 
 	hit(actor, tolerance) {
-		// return geometric.pointOnLine([px, py], [[this.ax, this.ay], [this.bx, this.by]]);
 		const hit = Segment.calcIsInsideThickLineSegment(actor.segment.b.x, actor.segment.b.y, this.ax, this.ay, this.bx, this.by, tolerance);
 		if (hit) {
 			return this;

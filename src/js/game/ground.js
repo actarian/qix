@@ -8,7 +8,7 @@ export default class Ground extends Polygon {
 	constructor() {
 		super();
 		const canvas = State.canvas;
-		this.rect = new Rect(20, 20, canvas.size.x - 40, canvas.size.y - 40);
+		this.rect = new Rect(50, 50, canvas.size.x - 100, canvas.size.y - 100);
 		this.init();
 	}
 
@@ -20,6 +20,8 @@ export default class Ground extends Polygon {
 			new Segment(rect.right, rect.bottom, rect.left, rect.bottom), // bottom
 			new Segment(rect.left, rect.bottom, rect.left, rect.top), // left
 		];
+		State.totalArea = this.getArea();
+		console.log('State.totalArea', State.totalArea);
 	}
 
 	remove(polygon, firstSegment, lastSegment) {
@@ -77,6 +79,11 @@ export default class Ground extends Polygon {
 				points.push(points[0]);
 				this.rebuild(points);
 			}
+			State.area = this.getArea();
+			State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100);
+			console.log('State', State.area, State.percent);
+			const bar = document.querySelector('.progress__bar');
+			gsap.set(bar, { width: `${State.percent}%` });
 		}
 	}
 

@@ -9,17 +9,23 @@
         },
         {
           "input": "src/js/main.js",
-          "output": "docs/js/main.js",
-          "minify": false
+          "output": {
+            "file": "docs/js/main.js",
+            "format": "umd"
+          },
+          "globals": {
+            "gsap": "gsap"
+          }
         }
       ],
       "bundle": [
         {
           "input": [
-            "src/js/howler.js"
+            "node_modules/gsap/dist/EasePack.js",
+            "node_modules/gsap/dist/gsap.js"
           ],
           "output": "docs/js/vendors.js",
-          "minify": false
+          "minify": true
         }
       ]
     }

@@ -4,10 +4,12 @@
  * License:
  */
 
-(function () {
-	'use strict';
+(function (factory) {
+	typeof define === 'function' && define.amd ? define(factory) :
+	factory();
+}((function () { 'use strict';
 
-	var Vector2 = function () {
+	var Vector2 = /*#__PURE__*/function () {
 	  function Vector2(x, y) {
 	    if (x === void 0) {
 	      x = 0;
@@ -181,6 +183,7 @@
 	  };
 
 	  _proto.clamp = function clamp(min, max) {
+	    // assumes min < max, componentwise
 	    this.x = Math.max(min.x, Math.min(max.x, this.x));
 	    this.y = Math.max(min.y, Math.min(max.y, this.y));
 	    return this;
@@ -252,6 +255,7 @@
 	  };
 
 	  _proto.angle = function angle() {
+	    // computes the angle in radians with respect to the positive x-axis
 	    var angle = Math.atan2(-this.y, -this.x) + Math.PI;
 	    return angle;
 	  };
@@ -332,10 +336,12 @@
 	  return Vector2;
 	}();
 
-	var Canvas = function () {
-	  function Canvas() {
+	var Canvas = /*#__PURE__*/function () {
+	  function Canvas(width, height) {
 	    var canvas = this.canvas = document.querySelector('.game .canvas');
-	    var size = this.size = new Vector2(canvas.offsetWidth, canvas.offsetHeight);
+	    width = width || canvas.offsetWidth;
+	    height = height || canvas.offsetHeight;
+	    var size = this.size = new Vector2(width, height);
 	    canvas.width = size.x;
 	    canvas.height = size.y;
 	    this.ctx = canvas.getContext('2d');
@@ -370,7 +376,8 @@
 
 	  _proto.drawImage = function drawImage(image, x, y, scale, rotation) {
 	    var ctx = this.ctx;
-	    ctx.setTransform(scale, 0, 0, scale, x, y);
+	    ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
+
 	    ctx.rotate(rotation);
 	    ctx.drawImage(image, -image.naturalWidth / 2, -image.naturalWidth / 2);
 	    ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -378,11 +385,23 @@
 
 	  _proto.drawImageCenter = function drawImageCenter(image, x, y, cx, cy, scale, rotation) {
 	    var ctx = this.ctx;
-	    ctx.setTransform(scale, 0, 0, scale, x, y);
+	    ctx.setTransform(scale, 0, 0, scale, x, y); // sets scale and origin
+
 	    ctx.rotate(rotation);
 	    ctx.drawImage(image, -cx, -cy);
 	    ctx.setTransform(1, 0, 0, 1, 0, 0);
-	  };
+	  }
+	  /*
+	  resize() {
+	  	const canvas = this.canvas;
+	  	const rect = this.rect;
+	  	rect.width = canvas.offsetWidth;
+	  	rect.height = canvas.offsetHeight;
+	  	canvas.width = rect.width;
+	  	canvas.height = rect.height;
+	  }
+	  */
+	  ;
 
 	  return Canvas;
 	}();
@@ -428,7 +447,7 @@
 
 	var createClass = _createClass;
 
-	var Segment = function () {
+	var Segment = /*#__PURE__*/function () {
 	  createClass(Segment, [{
 	    key: "ax",
 	    get: function get() {
@@ -520,13 +539,15 @@
 	    var v = new Vector2(rayTip.x - intersection.x, rayTip.y - intersection.y);
 	    var d = n.dot(v);
 	    var dotNormal = new Vector2(d * n.x, d * n.y);
-	    var reflection = new Vector2(rayTip.x - dotNormal.x * 2, rayTip.y - dotNormal.y * 2);
-	    return reflection;
+	    var reflection = new Vector2(rayTip.x - dotNormal.x * 2, rayTip.y - dotNormal.y * 2); // console.log(dotNormal, intersection, rayTip);
+
+	    return reflection; // console.log(direction);
 	  };
 
 	  _proto.normal = function normal(p) {
 	    var dx = this.b.x - this.a.x;
-	    var dy = this.b.y - this.a.y;
+	    var dy = this.b.y - this.a.y; // const n = new Vector2(-dy, dx); // then the normals are (-dy, dx) and (dy, -dx).
+
 	    var n = new Vector2(dy, -dx);
 	    return n.normalize();
 	  };
@@ -538,12 +559,22 @@
 	  };
 
 	  _proto.getIntersection = function getIntersection(s) {
+	    // if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
 	    var denominator,
 	        a,
 	        b,
 	        numerator1,
 	        numerator2,
 	        result = new Vector2();
+	    /*
+	    {
+	    	x: null,
+	    	y: null,
+	    	intersectA: false,
+	    	intersectB: false
+	    };
+	    */
+
 	    denominator = (this.b.y - this.a.y) * (s.b.x - s.a.x) - (this.b.x - this.a.x) * (s.b.y - s.a.y);
 
 	    if (denominator === 0) {
@@ -555,17 +586,26 @@
 	    numerator1 = (this.b.x - this.a.x) * a - (this.b.y - this.a.y) * b;
 	    numerator2 = (s.b.x - s.a.x) * a - (s.b.y - s.a.y) * b;
 	    a = numerator1 / denominator;
-	    b = numerator2 / denominator;
+	    b = numerator2 / denominator; // if we cast these lines infinitely in both directions, they intersect here:
+
 	    result.x = s.a.x + a * (s.b.x - s.a.x);
 	    result.y = s.a.y + a * (s.b.y - s.a.y);
+	    /*
+	    // it is worth noting that this should be the same as:
+	    x = this.a.x + (b * (this.b.x - this.a.x));
+	    y = this.a.x + (b * (this.b.y - this.a.y));
+	    */
+	    // if line1 is a segment and line2 is infinite, they intersect if:
 
 	    if (a > 0 && a < 1) {
 	      result.intersectA = true;
-	    }
+	    } // if line2 is a segment and line1 is infinite, they intersect if:
+
 
 	    if (b > 0 && b < 1) {
 	      result.intersectB = true;
-	    }
+	    } // if line1 and line2 are segments, they intersect if both of the above are true
+
 
 	    return result;
 	  };
@@ -576,7 +616,8 @@
 	    if (hit) {
 	      return this;
 	    }
-	  };
+	  } // The most useful function. Returns bool true, if the mouse point is actually inside the (finite) line, given a line thickness from the theoretical line away. It also assumes that the line end points are circular, not square.
+	  ;
 
 	  Segment.calcIsInsideThickLineSegment = function calcIsInsideThickLineSegment(px, py, ax, ay, bx, by, tolerance) {
 	    if (tolerance === void 0) {
@@ -585,14 +626,17 @@
 
 	    var L2 = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
 	    if (L2 == 0) return false;
-	    var r = ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / L2;
+	    var r = ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / L2; // Assume line thickness is circular
 
 	    if (r < 0) {
+	      // Outside a
 	      return Math.sqrt((ax - px) * (ax - px) + (ay - py) * (ay - py)) <= tolerance;
 	    } else if (0 <= r && r <= 1) {
+	      // On the line segment
 	      var s = ((ay - py) * (bx - ax) - (ax - px) * (by - ay)) / L2;
 	      return Math.abs(s) * Math.sqrt(L2) <= tolerance;
 	    } else {
+	      // Outside b
 	      return Math.sqrt((bx - px) * (bx - px) + (by - py) * (by - py)) <= tolerance;
 	    }
 	  };
@@ -600,7 +644,7 @@
 	  return Segment;
 	}();
 
-	var Polygon = function () {
+	var Polygon = /*#__PURE__*/function () {
 	  function Polygon(points) {
 	    var _this = this;
 
@@ -616,6 +660,22 @@
 	  }
 
 	  var _proto = Polygon.prototype;
+
+	  _proto.getArea = function getArea() {
+	    var points = this.getPoints();
+	    var area = 0;
+
+	    for (var i = 0, l = points.length; i < l; i++) {
+	      var addX = points[i].x;
+	      var addY = points[i == l - 1 ? 0 : i + 1].y;
+	      var subX = points[i == l - 1 ? 0 : i + 1].x;
+	      var subY = points[i].y;
+	      area += addX * addY * 0.5;
+	      area -= subX * subY * 0.5;
+	    }
+
+	    return Math.abs(area);
+	  };
 
 	  _proto.rebuild = function rebuild(points) {
 	    var segments = [];
@@ -637,6 +697,12 @@
 	        return s;
 	      }
 	    }
+	    /*
+	    return this.segments.reduce((p, c) => {
+	    	return p || c.hit(actor, tolerance);
+	    }, false);
+	    */
+
 	  };
 
 	  _proto.hitSegments = function hitSegments(actor, tolerance) {
@@ -750,7 +816,7 @@
 	  return Polygon;
 	}();
 
-	var Cut = function (_Polygon) {
+	var Cut = /*#__PURE__*/function (_Polygon) {
 	  inheritsLoose(Cut, _Polygon);
 
 	  function Cut() {
@@ -773,6 +839,7 @@
 	      segment = new Segment(actor.position.x, actor.position.y, actor.nx, actor.ny);
 	      this.segments.push(segment);
 	    } else if (Math.abs(this.direction.x) !== Math.abs(actor.direction.x)) {
+	      // direction changed
 	      var s = this.segments[this.segments.length - 1];
 	      segment = new Segment(s.b.x, s.b.y, actor.nx, actor.ny);
 	      this.segments.push(segment);
@@ -830,7 +897,7 @@
 	  return Cut;
 	}(Polygon);
 
-	var Enemy = function () {
+	var Enemy = /*#__PURE__*/function () {
 	  createClass(Enemy, [{
 	    key: "nx",
 	    get: function get() {
@@ -866,6 +933,14 @@
 	    var ctx = canvas.ctx;
 	    var mouth = State.resources.get(State.assets.mouth);
 	    ctx.drawImage(mouth, this.position.x - mouth.naturalWidth / 2, this.position.y - mouth.naturalHeight / 2);
+	    /*
+	    ctx.beginPath();
+	    ctx.strokeStyle = "black";
+	    ctx.arc(this.position.x, this.position.y, 5, 0, 2 * Math.PI, true);
+	    ctx.stroke();
+	    ctx.fillStyle = "red";
+	    ctx.fill();
+	    */
 	  };
 
 	  _proto.checkCollision = function checkCollision() {
@@ -885,6 +960,9 @@
 	      var bounce = ground.bounce(segment);
 
 	      if (bounce) {
+	        // this.position.copy(bounce.r);
+	        // this.direction.x *= -1;
+	        // this.direction.y *= -1;
 	        this.direction.copy(bounce.d);
 	      }
 
@@ -900,7 +978,7 @@
 	  return Enemy;
 	}();
 
-	var Rect = function () {
+	var Rect = /*#__PURE__*/function () {
 	  function Rect(x, y, width, height) {
 	    this.x = x;
 	    this.y = y;
@@ -936,10 +1014,13 @@
 	    var rects = node.getClientRects();
 
 	    if (!rects.length) {
+	      // console.log(rects, node);
 	      return rect;
 	    }
 
-	    var boundingRect = node.getBoundingClientRect();
+	    var boundingRect = node.getBoundingClientRect(); // rect.top: boundingRect.top + defaultView.pageYOffset,
+	    // rect.left: boundingRect.left + defaultView.pageXOffset,
+
 	    rect.x = boundingRect.left;
 	    rect.y = boundingRect.top;
 	    rect.top = boundingRect.top;
@@ -957,7 +1038,7 @@
 	    this.height = h;
 	    this.right = this.left + this.width;
 	    this.bottom = this.top + this.height;
-	    this.setCenter();
+	    this.setCenter(); // console.log(w, h);
 	  };
 
 	  _proto.setCenter = function setCenter() {
@@ -1014,7 +1095,7 @@
 	  return Rect;
 	}();
 
-	var Ground = function (_Polygon) {
+	var Ground = /*#__PURE__*/function (_Polygon) {
 	  inheritsLoose(Ground, _Polygon);
 
 	  function Ground() {
@@ -1022,7 +1103,7 @@
 
 	    _this = _Polygon.call(this) || this;
 	    var canvas = State.canvas;
-	    _this.rect = new Rect(20, 20, canvas.size.x - 40, canvas.size.y - 40);
+	    _this.rect = new Rect(50, 50, canvas.size.x - 100, canvas.size.y - 100);
 
 	    _this.init();
 
@@ -1033,7 +1114,13 @@
 
 	  _proto.init = function init() {
 	    var rect = this.rect;
-	    this.segments = [new Segment(rect.left, rect.top, rect.right, rect.top), new Segment(rect.right, rect.top, rect.right, rect.bottom), new Segment(rect.right, rect.bottom, rect.left, rect.bottom), new Segment(rect.left, rect.bottom, rect.left, rect.top)];
+	    this.segments = [new Segment(rect.left, rect.top, rect.right, rect.top), // top
+	    new Segment(rect.right, rect.top, rect.right, rect.bottom), // right
+	    new Segment(rect.right, rect.bottom, rect.left, rect.bottom), // bottom
+	    new Segment(rect.left, rect.bottom, rect.left, rect.top) // left
+	    ];
+	    State.totalArea = this.getArea();
+	    console.log('State.totalArea', State.totalArea);
 	  };
 
 	  _proto.remove = function remove(polygon, firstSegment, lastSegment) {
@@ -1041,6 +1128,32 @@
 	      console.log(firstSegment, lastSegment);
 	      var i1 = this.segments.indexOf(firstSegment);
 	      var i2 = this.segments.indexOf(lastSegment);
+	      /*
+	      const i1 = this.segments.reduce((p, c, i) => {
+	      	const s = polygon.segments[0];
+	      	const m = c.getIntersection(s);
+	      	if (m && (m.intersectA)) {
+	      		console.log('i1', i);
+	      		s.a.x = m.x;
+	      		s.a.y = m.y;
+	      		return i;
+	      	} else {
+	      		return p;
+	      	}
+	      }, -1);
+	      const i2 = this.segments.reduce((p, c, i) => {
+	      	const s = polygon.segments[polygon.segments.length - 1];
+	      	const m = c.getIntersection(s);
+	      	if (m && (m.intersectA)) {
+	      		console.log('i2', i);
+	      		s.b.x = m.x;
+	      		s.b.y = m.y;
+	      		return i;
+	      	} else {
+	      		return p;
+	      	}
+	      }, -1);
+	      */
 
 	      if (i1 !== -1 && i2 !== -1) {
 	        console.log('close!', i1, i2);
@@ -1072,6 +1185,14 @@
 	        points.push(points[0]);
 	        this.rebuild(points);
 	      }
+
+	      State.area = this.getArea();
+	      State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100);
+	      console.log('State', State.area, State.percent);
+	      var bar = document.querySelector('.progress__bar');
+	      gsap.set(bar, {
+	        width: State.percent + "%"
+	      });
 	    }
 	  };
 
@@ -1093,6 +1214,12 @@
 	      } else {
 	        ctx.lineTo(s.a.x, s.a.y);
 	      }
+	      /*
+	      if (i === t - 1) {
+	      	ctx.lineTo(s.b.x, s.b.y);
+	      }
+	      */
+
 	    }
 
 	    ctx.closePath();
@@ -1102,7 +1229,7 @@
 	    ctx.drawImage(designer, 0, 0, designer.naturalWidth, designer.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
 	    ctx.restore();
 	    ctx.stroke();
-	    ctx.strokeRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+	    ctx.strokeRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height); // ctx.fill();
 	  };
 
 	  _proto.x = function x(_x) {
@@ -1116,7 +1243,7 @@
 	  return Ground;
 	}(Polygon);
 
-	var Player = function () {
+	var Player = /*#__PURE__*/function () {
 	  createClass(Player, [{
 	    key: "nx",
 	    get: function get() {
@@ -1147,10 +1274,29 @@
 	  };
 
 	  _proto.draw = function draw() {
+	    // const ground = State.ground;
 	    var canvas = State.canvas;
-	    var ctx = canvas.ctx;
 	    var diamond = State.resources.get(State.assets.diamond);
+	    /*
+	    const ctx = canvas.ctx;
+	    ctx.save();
+	    ctx.translate(this.position.x, this.position.y);
+	    if (this.getOrientation() === 1) {
+	    	ctx.rotate(Math.PI / 2);
+	    }
+	    ctx.drawImage(diamond, -diamond.naturalWidth / 2 + 100, -diamond.naturalHeight / 2);
+	    ctx.restore();
+	    */
+
 	    canvas.drawImage(diamond, this.position.x, this.position.y, 1, this.getOrientation() === 0 ? Math.PI / 2 : 0);
+	    /*
+	    ctx.beginPath();
+	    ctx.strokeStyle = "black";
+	    ctx.arc(this.position.x, this.position.y, 5, 0, 2 * Math.PI, true);
+	    ctx.stroke();
+	    ctx.fillStyle = "green";
+	    ctx.fill();
+	    */
 	  };
 
 	  _proto.getOrientation = function getOrientation() {
@@ -1252,7 +1398,7 @@
 	var cache = {};
 	var callbacks = [];
 
-	var Resources = function () {
+	var Resources = /*#__PURE__*/function () {
 	  function Resources() {}
 
 	  Resources.loadAssets = function loadAssets(assets) {
@@ -1315,14 +1461,14 @@
 	  return Resources;
 	}();
 
-	var Game = function () {
+	var Game = /*#__PURE__*/function () {
 	  function Game() {
 	    var _this = this;
 
-	    var canvas = this.canvas = State.canvas = new Canvas();
+	    var canvas = this.canvas = State.canvas = new Canvas(750, 750);
 	    var ground = this.ground = State.ground = new Ground();
 	    var cut = this.cut = State.cut = new Cut();
-	    var enemies = State.enemies = new Array(3).fill(0).map(function (x) {
+	    var enemies = State.enemies = new Array(1).fill(0).map(function (x) {
 	      return new Enemy();
 	    });
 	    var player = State.player = new Player();
@@ -1335,6 +1481,8 @@
 	    var resources = State.resources = Resources;
 	    Resources.onReady(function () {
 	      _this.init();
+
+	      _this.start();
 	    });
 	    Resources.loadAssets(assets);
 	  }
@@ -1347,7 +1495,30 @@
 	    this.onKeyup = this.onKeyup.bind(this);
 	    document.addEventListener("keydown", this.onKeydown);
 	    document.addEventListener("keyup", this.onKeyup);
+	  };
+
+	  _proto.start = function start() {
+	    State.area = 0;
 	    this.loop();
+	    this.addMoreEnemy();
+	  };
+
+	  _proto.addMoreEnemy = function addMoreEnemy() {
+	    var _this2 = this;
+
+	    if (this.to) {
+	      clearTimeout(this.to);
+	    }
+
+	    var add = function add() {
+	      if ( !State.paused) {
+	        State.enemies.push(new Enemy());
+
+	        _this2.addMoreEnemy();
+	      }
+	    };
+
+	    this.to = setTimeout(add, 10000);
 	  };
 
 	  _proto.loop = function loop() {
@@ -1360,6 +1531,21 @@
 	          return x.update();
 	        });
 	        State.player.update();
+	        /*
+	        this.grid.paint();
+	        this.player.update();
+	        this.player.paint();
+	        this.grid.enemies.forEach((enemy) => {
+	            enemy.update();
+	            enemy.paint();
+	        });
+	        this.qix.update();
+	        this.qix.draw();
+	        this.measureFPS();
+	        this.grid.displayScore();
+	        this.grid.displayTimer();
+	        */
+
 	        requestAnimationFrame(this.loop);
 	      }
 	    }
@@ -1369,83 +1555,75 @@
 	    if (State.paused) {
 	      State.paused = false;
 	      this.loop();
+	      this.addMoreEnemy();
 	    } else {
 	      State.paused = true;
 	    }
 	  };
 
-	  _proto.onKeydown = function onKeydown(event) {
-	    var keys = State.keys;
-	    Object.keys(keys).forEach(function (key) {
-	      keys[key] = false;
-	    });
-	    keys.shift = event.shiftKey;
+	  _proto.handleKeyCode = function handleKeyCode(event) {
+	    var keyCode = 'unknown';
 
 	    switch (event.keyCode) {
 	      case 32:
+	        // space
 	        event.preventDefault();
-	        keys.space = true;
+	        keyCode = 'space';
 	        break;
 
 	      case 37:
+	        // left
 	        event.preventDefault();
-	        keys.left = true;
+	        keyCode = 'left';
 	        break;
 
 	      case 38:
+	        // up
 	        event.preventDefault();
-	        keys.up = true;
+	        keyCode = 'up';
 	        break;
 
 	      case 39:
+	        // right
 	        event.preventDefault();
-	        keys.right = true;
+	        keyCode = 'right';
 	        break;
 
 	      case 40:
+	        // down
 	        event.preventDefault();
-	        keys.down = true;
+	        keyCode = 'down';
 	        break;
+	    }
 
-	      case 112:
-	        this.toggle();
-	        break;
+	    return keyCode;
+	  };
+
+	  _proto.onKeydown = function onKeydown(event) {
+	    var keys = State.keys;
+	    event = event || window.event; // to deal with IE
+
+	    keys.shift = event.shiftKey;
+
+	    switch (event.keyCode) {
+	      case 112: // f1
 
 	      case 80:
+	        // p
 	        this.toggle();
 	        break;
+
+	      default:
+	        keys[this.handleKeyCode(event)] = event.type == 'keydown';
 	    }
 	  };
 
 	  _proto.onKeyup = function onKeyup(event) {
 	    var keys = State.keys;
+	    event = event || window.event; // to deal with IE
 
-	    switch (event.keyCode) {
-	      case 32:
-	        event.preventDefault();
-	        keys.space = false;
-	        break;
-
-	      case 37:
-	        event.preventDefault();
-	        keys.left = false;
-	        break;
-
-	      case 38:
-	        event.preventDefault();
-	        keys.up = false;
-	        break;
-
-	      case 39:
-	        event.preventDefault();
-	        keys.right = false;
-	        break;
-
-	      case 40:
-	        event.preventDefault();
-	        keys.down = false;
-	        break;
-	    }
+	    keys.shift = event.shiftKey;
+	    keys[this.handleKeyCode(event)] = event.type == 'keydown';
 	  };
 
 	  return Game;
@@ -1453,5 +1631,5 @@
 
 	var game = new Game();
 
-}());
+})));
 //# sourceMappingURL=main.js.map
