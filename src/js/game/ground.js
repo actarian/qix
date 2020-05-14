@@ -27,6 +27,7 @@ export default class Ground extends Polygon {
 	remove(polygon, firstSegment, lastSegment) {
 		if (polygon.segments.length) {
 			const cutPoints = polygon.getPoints(true);
+			/*
 			let checkPoints = cutPoints.slice();
 			const first = checkPoints[0];
 			if (firstSegment.a.distanceTo(first) < firstSegment.b.distanceTo(first)) {
@@ -41,6 +42,8 @@ export default class Ground extends Polygon {
 				checkPoints.push(lastSegment.b);
 			}
 			const isClockWise = polygon.IsClockwise(checkPoints);
+			*/
+			const isClockWise = false;
 			const forwardPoints = this.getForwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
 			const backwardPoints = this.getBackwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
 			const a1 = this.getAreaFromPoints(forwardPoints);
@@ -109,6 +112,50 @@ export default class Ground extends Polygon {
 		return points;
 	}
 
+	draw() {
+		const canvas = State.canvas;
+		const ctx = canvas.ctx;
+		const packaging = State.resources.get(State.assets.packaging);
+		ctx.drawImage(packaging, 0, 0, packaging.naturalWidth, packaging.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+		ctx.lineWidth = "3";
+		ctx.strokeStyle = "black";
+		if (!State.ended) {
+			ctx.beginPath();
+			const t = this.segments.length;
+			for (let i = 0; i < t; i++) {
+				const s = this.segments[i];
+				if (i === 0) {
+					ctx.moveTo(s.a.x, s.a.y);
+				} else {
+					ctx.lineTo(s.a.x, s.a.y);
+				}
+				/*
+				if (i === t - 1) {
+					ctx.lineTo(s.b.x, s.b.y);
+				}
+				*/
+			}
+			ctx.closePath();
+			ctx.save();
+			ctx.clip();
+			const designer = State.resources.get(State.assets.designer);
+			ctx.drawImage(designer, 0, 0, designer.naturalWidth, designer.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+			ctx.restore();
+			ctx.stroke();
+		}
+		ctx.strokeRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height);
+		// ctx.fill();
+	}
+
+	x(x) {
+		return this.rect.left + x * this.rect.width;
+	}
+
+	y(y) {
+		return this.rect.top + y * this.rect.height;
+	}
+
+	/*
 	remove_b(polygon, firstSegment, lastSegment) {
 		if (polygon.segments.length) {
 			const cutPoints = polygon.getPoints(true);
@@ -184,48 +231,5 @@ export default class Ground extends Polygon {
 			}
 		}
 	}
-
-	draw() {
-		const canvas = State.canvas;
-		const ctx = canvas.ctx;
-		const packaging = State.resources.get(State.assets.packaging);
-		ctx.drawImage(packaging, 0, 0, packaging.naturalWidth, packaging.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
-		ctx.lineWidth = "3";
-		ctx.strokeStyle = "black";
-		if (!State.ended) {
-			ctx.beginPath();
-			const t = this.segments.length;
-			for (let i = 0; i < t; i++) {
-				const s = this.segments[i];
-				if (i === 0) {
-					ctx.moveTo(s.a.x, s.a.y);
-				} else {
-					ctx.lineTo(s.a.x, s.a.y);
-				}
-				/*
-				if (i === t - 1) {
-					ctx.lineTo(s.b.x, s.b.y);
-				}
-				*/
-			}
-			ctx.closePath();
-			ctx.save();
-			ctx.clip();
-			const designer = State.resources.get(State.assets.designer);
-			ctx.drawImage(designer, 0, 0, designer.naturalWidth, designer.naturalHeight, this.rect.x, this.rect.y, this.rect.width, this.rect.height);
-			ctx.restore();
-			ctx.stroke();
-		}
-		ctx.strokeRect(this.rect.x, this.rect.y, this.rect.width, this.rect.height);
-		// ctx.fill();
-	}
-
-	x(x) {
-		return this.rect.left + x * this.rect.width;
-	}
-
-	y(y) {
-		return this.rect.top + y * this.rect.height;
-	}
-
+	*/
 }
