@@ -665,6 +665,10 @@
 
 	  _proto.getArea = function getArea() {
 	    var points = this.getPoints();
+	    return this.getAreaFromPoints(points);
+	  };
+
+	  _proto.getAreaFromPoints = function getAreaFromPoints(points) {
 	    var area = 0;
 
 	    for (var i = 0, l = points.length; i < l; i++) {
@@ -687,8 +691,7 @@
 	      segments.push(new Segment(p.x, p.y, points[i + 1].x, points[i + 1].y));
 	    }
 
-	    this.segments = segments;
-	    console.log('segments', segments);
+	    this.segments = segments; // console.log('segments', segments);
 	  };
 
 	  _proto.hit = function hit(actor, tolerance) {
@@ -787,6 +790,18 @@
 	    }
 
 	    return points;
+	  };
+
+	  _proto.IsClockwise = function IsClockwise(points) {
+	    var sum = 0;
+
+	    for (var i = 0; i < points.length; i++) {
+	      var a = points[i];
+	      var b = points[(i + 1) % points.length];
+	      sum += (b.x - a.x) * (b.y + a.y);
+	    }
+
+	    return sum < 0;
 	  };
 
 	  _proto.isPointInside = function isPointInside(p, points) {
@@ -1164,35 +1179,164 @@
 
 	  _proto.remove = function remove(polygon, firstSegment, lastSegment) {
 	    if (polygon.segments.length) {
+	      var cutPoints = polygon.getPoints(true);
+	      var checkPoints = cutPoints.slice();
+	      var first = checkPoints[0];
+
+	      if (firstSegment.a.distanceTo(first) < firstSegment.b.distanceTo(first)) {
+	        checkPoints.unshift(firstSegment.a);
+	      } else {
+	        checkPoints.unshift(firstSegment.b);
+	      }
+
+	      var last = checkPoints[checkPoints.length - 1];
+
+	      if (lastSegment.a.distanceTo(last) < lastSegment.b.distanceTo(last)) {
+	        checkPoints.push(lastSegment.a);
+	      } else {
+	        checkPoints.push(lastSegment.b);
+	      }
+
+	      var isClockWise = polygon.IsClockwise(checkPoints);
+	      var forwardPoints = this.getForwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
+	      var backwardPoints = this.getBackwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
+	      var a1 = this.getAreaFromPoints(forwardPoints);
+	      var a2 = this.getAreaFromPoints(backwardPoints);
+
+	      if (a1 > a2) {
+	        this.rebuild(forwardPoints);
+	      } else {
+	        this.rebuild(backwardPoints);
+	      }
+	    }
+	  };
+
+	  _proto.getForwardPoints = function getForwardPoints(cutPoints, firstSegment, lastSegment, isClockWise) {
+	    var s1, s2;
+
+	    if (isClockWise) {
+	      cutPoints.reverse();
+	      s1 = lastSegment;
+	      s2 = firstSegment;
+	    } else {
+	      s1 = firstSegment;
+	      s2 = lastSegment;
+	    }
+
+	    var i1 = this.segments.indexOf(s1);
+	    var i2 = this.segments.indexOf(s2);
+	    var points = [s1.a];
+	    points.push.apply(points, cutPoints);
+	    var from = i2 + 1;
+	    var to = i1;
+	    var t = this.segments.length;
+
+	    for (var j = from; j < from + t; j++) {
+	      var i = j % t;
+	      points.push(this.segments[i].a);
+
+	      if (i === to) {
+	        break;
+	      }
+	    }
+
+	    return points;
+	  };
+
+	  _proto.getBackwardPoints = function getBackwardPoints(cutPoints, firstSegment, lastSegment, isClockWise) {
+	    var s1, s2;
+
+	    if (isClockWise) {
+	      s1 = lastSegment;
+	      s2 = firstSegment;
+	    } else {
+	      cutPoints.reverse();
+	      s1 = firstSegment;
+	      s2 = lastSegment;
+	    }
+
+	    var i1 = this.segments.indexOf(s1);
+	    var i2 = this.segments.indexOf(s2);
+	    var points = cutPoints.slice();
+
+	    if (i1 !== i2) {
+	      var from = i1;
+	      var to = i2;
+	      var t = this.segments.length;
+
+	      for (var j = from; j < from + t; j++) {
+	        var i = j % t;
+
+	        if (i === to) {
+	          break;
+	        }
+
+	        points.push(this.segments[i].b);
+	      }
+	    }
+
+	    points.push(points[0]);
+	    return points;
+	  };
+
+	  _proto.remove_b = function remove_b(polygon, firstSegment, lastSegment) {
+	    if (polygon.segments.length) {
+	      var cutPoints = polygon.getPoints(true);
+	      var checkPoints = cutPoints.slice();
+
+	      if (checkPoints.length === 2) {
+	        var last = checkPoints[checkPoints.length - 1];
+
+	        if (lastSegment.a.distanceTo(last) < lastSegment.b.distanceTo(last)) {
+	          checkPoints.push(lastSegment.a);
+	        } else {
+	          checkPoints.push(lastSegment.b);
+	        }
+	      }
+
+	      var isClockWise = polygon.IsClockwise(checkPoints);
+	      var s1, s2;
+
+	      if (isClockWise) {
+	        cutPoints.reverse();
+	        s1 = lastSegment;
+	        s2 = firstSegment;
+	      } else {
+	        s1 = firstSegment;
+	        s2 = lastSegment;
+	      }
+
+	      var i1 = this.segments.indexOf(s1);
+	      var i2 = this.segments.indexOf(s2); // console.log(s1, s2);
+	      // console.log('close!', i1, i2);
+	      // console.log('cutPoints.length', cutPoints.length, polygon.segments.length);
+
+	      var points = [s1.a];
+	      points.push.apply(points, cutPoints);
+	      var from = i2 + 1;
+	      var to = i1; // i1 === i2 ? i1 + 1 : i1;
+
+	      var t = this.segments.length;
+	      console.log(from, to, i1, i2, t, isClockWise);
+
+	      for (var j = from; j < from + t; j++) {
+	        var i = j % t;
+	        points.push(this.segments[i].a);
+
+	        if (i === to) {
+	          break;
+	        }
+	      }
+
+	      this.rebuild(points);
+	    }
+	  };
+
+	  _proto.remove_c = function remove_c(polygon, firstSegment, lastSegment) {
+	    if (polygon.segments.length) {
 	      // console.log(firstSegment, lastSegment);
 	      var i1 = this.segments.indexOf(firstSegment);
 	      var i2 = this.segments.indexOf(lastSegment);
-	      /*
-	      const i1 = this.segments.reduce((p, c, i) => {
-	      	const s = polygon.segments[0];
-	      	const m = c.getIntersection(s);
-	      	if (m && (m.intersectA)) {
-	      		console.log('i1', i);
-	      		s.a.x = m.x;
-	      		s.a.y = m.y;
-	      		return i;
-	      	} else {
-	      		return p;
-	      	}
-	      }, -1);
-	      const i2 = this.segments.reduce((p, c, i) => {
-	      	const s = polygon.segments[polygon.segments.length - 1];
-	      	const m = c.getIntersection(s);
-	      	if (m && (m.intersectA)) {
-	      		console.log('i2', i);
-	      		s.b.x = m.x;
-	      		s.b.y = m.y;
-	      		return i;
-	      	} else {
-	      		return p;
-	      	}
-	      }, -1);
-	      */
 
 	      if (i1 !== -1 && i2 !== -1) {
 	        // console.log('close!', i1, i2);
@@ -1379,7 +1523,7 @@
 	    if (this.active && (this.direction.x || this.direction.y)) {
 	      if (hitted = ground.hit(this, 3)) {
 	        if (hitted instanceof Segment && cut.segments.length) {
-	          console.log('close');
+	          // console.log('close');
 	          var i = hitted.getIntersection(this.segment);
 
 	          if (i && (i.intersectA || i.intersectB)) {
@@ -1412,7 +1556,7 @@
 	        this.direction.x = 0;
 	        this.direction.y = 0;
 	      } else {
-	        console.log('segment');
+	        // console.log('segment');
 	        cut.move(this);
 	        this.currentSegment = cut.segments[cut.segments.length - 1];
 	      }
@@ -1611,7 +1755,7 @@
 	  };
 
 	  _proto.onPlayerReset = function onPlayerReset() {
-	    State.keys.space = state.keys.shift = false;
+	    State.keys.space = State.keys.shift = false;
 	  };
 
 	  _proto.addEnemy = function addEnemy() {
@@ -1651,8 +1795,7 @@
 	  };
 
 	  _proto.addScore = function addScore(score) {
-	    State.score += score;
-	    console.log('addScore', score);
+	    State.score += score; // console.log('addScore', score);
 	  };
 
 	  _proto.loop = function loop() {

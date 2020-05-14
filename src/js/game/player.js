@@ -93,7 +93,7 @@ export default class Player {
 		if (this.active && (this.direction.x || this.direction.y)) {
 			if (hitted = ground.hit(this, 3)) {
 				if (hitted instanceof Segment && cut.segments.length) {
-					console.log('close');
+					// console.log('close');
 					const i = hitted.getIntersection(this.segment);
 					if (i && (i.intersectA || i.intersectB)) {
 						this.position.x = i.x;
@@ -124,7 +124,7 @@ export default class Player {
 				this.direction.x = 0;
 				this.direction.y = 0;
 			} else {
-				console.log('segment');
+				// console.log('segment');
 				cut.move(this);
 				this.currentSegment = cut.segments[cut.segments.length - 1];
 			}

@@ -26,35 +26,138 @@ export default class Ground extends Polygon {
 
 	remove(polygon, firstSegment, lastSegment) {
 		if (polygon.segments.length) {
+			const cutPoints = polygon.getPoints(true);
+			let checkPoints = cutPoints.slice();
+			const first = checkPoints[0];
+			if (firstSegment.a.distanceTo(first) < firstSegment.b.distanceTo(first)) {
+				checkPoints.unshift(firstSegment.a);
+			} else {
+				checkPoints.unshift(firstSegment.b);
+			}
+			const last = checkPoints[checkPoints.length - 1];
+			if (lastSegment.a.distanceTo(last) < lastSegment.b.distanceTo(last)) {
+				checkPoints.push(lastSegment.a);
+			} else {
+				checkPoints.push(lastSegment.b);
+			}
+			const isClockWise = polygon.IsClockwise(checkPoints);
+			const forwardPoints = this.getForwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
+			const backwardPoints = this.getBackwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
+			const a1 = this.getAreaFromPoints(forwardPoints);
+			const a2 = this.getAreaFromPoints(backwardPoints);
+			if (a1 > a2) {
+				this.rebuild(forwardPoints);
+			} else {
+				this.rebuild(backwardPoints);
+			}
+		}
+	}
+
+	getForwardPoints(cutPoints, firstSegment, lastSegment, isClockWise) {
+		let s1, s2;
+		if (isClockWise) {
+			cutPoints.reverse();
+			s1 = lastSegment;
+			s2 = firstSegment;
+		} else {
+			s1 = firstSegment;
+			s2 = lastSegment;
+		}
+		const i1 = this.segments.indexOf(s1);
+		const i2 = this.segments.indexOf(s2);
+		const points = [s1.a];
+		points.push.apply(points, cutPoints);
+		const from = i2 + 1;
+		const to = i1;
+		const t = this.segments.length;
+		for (let j = from; j < from + t; j++) {
+			const i = j % t;
+			points.push(this.segments[i].a);
+			if (i === to) {
+				break;
+			}
+		}
+		return points;
+	}
+
+	getBackwardPoints(cutPoints, firstSegment, lastSegment, isClockWise) {
+		let s1, s2;
+		if (isClockWise) {
+			s1 = lastSegment;
+			s2 = firstSegment;
+		} else {
+			cutPoints.reverse();
+			s1 = firstSegment;
+			s2 = lastSegment;
+		}
+		const i1 = this.segments.indexOf(s1);
+		const i2 = this.segments.indexOf(s2);
+		const points = cutPoints.slice();
+		if (i1 !== i2) {
+			const from = i1;
+			const to = i2;
+			const t = this.segments.length;
+			for (let j = from; j < from + t; j++) {
+				const i = j % t;
+				if (i === to) {
+					break;
+				}
+				points.push(this.segments[i].b);
+			}
+		}
+		points.push(points[0]);
+		return points;
+	}
+
+	remove_b(polygon, firstSegment, lastSegment) {
+		if (polygon.segments.length) {
+			const cutPoints = polygon.getPoints(true);
+			let checkPoints = cutPoints.slice();
+			if (checkPoints.length === 2) {
+				const last = checkPoints[checkPoints.length - 1];
+				if (lastSegment.a.distanceTo(last) < lastSegment.b.distanceTo(last)) {
+					checkPoints.push(lastSegment.a);
+				} else {
+					checkPoints.push(lastSegment.b);
+				}
+			}
+			const isClockWise = polygon.IsClockwise(checkPoints);
+			let s1, s2;
+			if (isClockWise) {
+				cutPoints.reverse();
+				s1 = lastSegment;
+				s2 = firstSegment;
+			} else {
+				s1 = firstSegment;
+				s2 = lastSegment;
+			}
+			const i1 = this.segments.indexOf(s1);
+			const i2 = this.segments.indexOf(s2);
+			// console.log(s1, s2);
+			// console.log('close!', i1, i2);
+			// console.log('cutPoints.length', cutPoints.length, polygon.segments.length);
+			const points = [s1.a];
+			points.push.apply(points, cutPoints);
+			const from = i2 + 1;
+			const to = i1; // i1 === i2 ? i1 + 1 : i1;
+			const t = this.segments.length;
+			console.log(from, to, i1, i2, t, isClockWise);
+			for (let j = from; j < from + t; j++) {
+				const i = j % t;
+				points.push(this.segments[i].a);
+				if (i === to) {
+					break;
+				}
+			}
+			this.rebuild(points);
+		}
+	}
+
+	remove_c(polygon, firstSegment, lastSegment) {
+		if (polygon.segments.length) {
 			// console.log(firstSegment, lastSegment);
 			const i1 = this.segments.indexOf(firstSegment);
 			const i2 = this.segments.indexOf(lastSegment);
-			/*
-			const i1 = this.segments.reduce((p, c, i) => {
-				const s = polygon.segments[0];
-				const m = c.getIntersection(s);
-				if (m && (m.intersectA)) {
-					console.log('i1', i);
-					s.a.x = m.x;
-					s.a.y = m.y;
-					return i;
-				} else {
-					return p;
-				}
-			}, -1);
-			const i2 = this.segments.reduce((p, c, i) => {
-				const s = polygon.segments[polygon.segments.length - 1];
-				const m = c.getIntersection(s);
-				if (m && (m.intersectA)) {
-					console.log('i2', i);
-					s.b.x = m.x;
-					s.b.y = m.y;
-					return i;
-				} else {
-					return p;
-				}
-			}, -1);
-			*/
 			if (i1 !== -1 && i2 !== -1) {
 				// console.log('close!', i1, i2);
 				const cutPoints = polygon.getPoints(true);

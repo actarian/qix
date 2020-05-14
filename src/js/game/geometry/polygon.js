@@ -16,6 +16,10 @@ export default class Polygon {
 
 	getArea() {
 		const points = this.getPoints();
+		return this.getAreaFromPoints(points);
+	}
+
+	getAreaFromPoints(points) {
 		let area = 0;
 		for (let i = 0, l = points.length; i < l; i++) {
 			const addX = points[i].x;
@@ -35,7 +39,7 @@ export default class Polygon {
 			segments.push(new Segment(p.x, p.y, points[i + 1].x, points[i + 1].y));
 		}
 		this.segments = segments;
-		console.log('segments', segments);
+		// console.log('segments', segments);
 	}
 
 	hit(actor, tolerance) {
@@ -123,6 +127,16 @@ export default class Polygon {
 			points.push(this.segments[this.segments.length - 1].b);
 		}
 		return points;
+	}
+
+	IsClockwise(points) {
+		let sum = 0;
+		for (let i = 0; i < points.length; i++) {
+			const a = points[i];
+			const b = points[(i + 1) % points.length];
+			sum += (b.x - a.x) * (b.y + a.y);
+		}
+		return sum < 0;
 	}
 
 	isPointInside(p, points) {

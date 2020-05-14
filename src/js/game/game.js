@@ -102,7 +102,7 @@ export default class Game {
 	}
 
 	onPlayerReset() {
-		State.keys.space = state.keys.shift = false;
+		State.keys.space = State.keys.shift = false;
 	}
 
 	addEnemy() {
@@ -136,7 +136,7 @@ export default class Game {
 
 	addScore(score) {
 		State.score += score;
-		console.log('addScore', score);
+		// console.log('addScore', score);
 	}
 
 	loop() {
