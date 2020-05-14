@@ -1649,6 +1649,9 @@
 	    this.onKeydown = this.onKeydown.bind(this);
 	    this.onKeyup = this.onKeyup.bind(this);
 	    this.restart = this.restart.bind(this);
+	    this.onTouchStart = this.onTouchStart.bind(this);
+	    this.onTouchMove = this.onTouchMove.bind(this);
+	    this.onTouchEnd = this.onTouchEnd.bind(this);
 	    State.addEnemy = this.addEnemy.bind(this);
 	    State.removeEnemy = this.removeEnemy.bind(this);
 	    State.addScore = this.addScore.bind(this);
@@ -1659,6 +1662,18 @@
 	    document.addEventListener("keyup", this.onKeyup);
 	    var restart = document.querySelector('.btn--restart');
 	    restart.addEventListener("click", this.restart);
+	    var arrows = this.arrows = document.querySelector('.game-container .arrows');
+	    arrows.addEventListener('touchstart', this.onTouchStart);
+	  };
+
+	  _proto.addTouchListeners = function addTouchListeners() {
+	    document.addEventListener("touchmove", this.onTouchMove);
+	    document.addEventListener("touchend", this.onTouchEnd);
+	  };
+
+	  _proto.removeTouchListeners = function removeTouchListeners() {
+	    document.removeEventListener("touchmove", this.onTouchMove);
+	    document.removeEventListener("touchend", this.onTouchEnd);
 	  };
 
 	  _proto.start = function start() {
@@ -1869,6 +1884,42 @@
 
 	    keys.shift = event.shiftKey;
 	    keys[this.handleKeyCode(event)] = event.type == 'keydown';
+	  };
+
+	  _proto.onHandleTouches = function onHandleTouches(event) {
+	    var touches = event.touches;
+	    var touch = touches[0];
+	    var arrows = this.arrows;
+	    var ww = window.innerWidth;
+	    var aw = arrows.offsetWidth;
+	    var ah = arrows.offsetHeight; // console.log(touch.pageX, aw, ww, ww / 2 - aw / 6);
+
+	    State.keys.left = touch.pageX < ww / 2 - aw / 6;
+	    State.keys.right = touch.pageX > ww / 2 + aw / 6;
+	    State.keys.up = touch.pageY < arrows.offsetTop + ah / 2;
+	    State.keys.down = touch.pageY > arrows.offsetTop + ah / 2;
+	    State.keys.space = true; // console.log(State.keys);
+	  };
+
+	  _proto.onTouchStart = function onTouchStart(event) {
+	    // console.log('onTouchStart', event);
+	    this.addTouchListeners();
+	    this.onHandleTouches(event);
+	  };
+
+	  _proto.onTouchMove = function onTouchMove(event) {
+	    // console.log('onTouchMove', event);
+	    this.onHandleTouches(event);
+	  };
+
+	  _proto.onTouchEnd = function onTouchEnd(event) {
+	    // console.log('onTouchEnd', event);
+	    this.removeTouchListeners();
+	    State.keys.space = false;
+	    State.keys.left = false;
+	    State.keys.up = false;
+	    State.keys.right = false;
+	    State.keys.down = false;
 	  };
 
 	  return Game;

@@ -54,6 +54,8 @@
 	border: 3px solid black;
 	box-sizing: border-box;
 	font-family: 'Marker Felt', sans-serif;
+	user-select: none !important;
+	-webkit-touch-callout: none !important;
 
 	&>.left,
 	&>.right {
@@ -99,16 +101,37 @@
 
 	&>.left {
 		justify-content: center;
+
+		&>.group--head {
+			&>.btn--close {
+				display: none;
+				margin-bottom: 0;
+
+				svg {
+					width: 20px;
+					height: 20px;
+				}
+			}
+		}
 	}
 
 	&>.right {
-		.group--head {
+		&>.group--head {
 			display: flex;
 			justify-content: flex-end;
 
-			.btn--close {
+			&>.btn--close {
 				margin-bottom: 0;
+
+				svg {
+					width: 20px;
+					height: 20px;
+				}
 			}
+		}
+
+		.group--arrows {
+			display: none;
 		}
 	}
 
@@ -149,7 +172,6 @@
 		margin-left: 10px;
 	}
 }
-
 
 .progress {
 	position: relative;
@@ -195,4 +217,49 @@
 	to {
 		background-position: 50px 0%
 	}
+}
+
+@media (orientation: portrait) {
+
+	.game-container {
+		flex-direction: column;
+		padding: 0;
+		overflow-y: auto;
+
+		&>.left {
+			flex: 1 1 auto;
+			min-width: auto;
+			padding: 25px 25px 0 25px;
+
+			&>.group--head {
+				flex: 0 0 auto;
+				justify-content: space-between;
+				margin-bottom: 30px;
+
+				&>.btn--close {
+					display: block;
+				}
+			}
+
+			&>.group--foot {
+				display: none;
+			}
+		}
+
+		&>.right {
+			flex: 1 1 auto;
+			min-width: auto;
+			padding: 0 25px 5px 25px;
+
+			&>.group--head,
+			&>.group--foot {
+				display: none;
+			}
+
+			.group--arrows {
+				display: block;
+			}
+		}
+	}
+
 }

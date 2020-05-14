@@ -24,7 +24,11 @@
   background: #3b6d4e;
   border: 3px solid black;
   box-sizing: border-box;
-  font-family: 'Marker Felt', sans-serif; }
+  font-family: 'Marker Felt', sans-serif;
+  -webkit-user-select: none !important;
+      -ms-user-select: none !important;
+          user-select: none !important;
+  -webkit-touch-callout: none !important; }
   .game-container > .left,
   .game-container > .right {
     flex: 0 0 20%;
@@ -62,11 +66,22 @@
           margin-top: 20px; }
   .game-container > .left {
     justify-content: center; }
-  .game-container > .right .group--head {
+    .game-container > .left > .group--head > .btn--close {
+      display: none;
+      margin-bottom: 0; }
+      .game-container > .left > .group--head > .btn--close svg {
+        width: 20px;
+        height: 20px; }
+  .game-container > .right > .group--head {
     display: flex;
     justify-content: flex-end; }
-    .game-container > .right .group--head .btn--close {
+    .game-container > .right > .group--head > .btn--close {
       margin-bottom: 0; }
+      .game-container > .right > .group--head > .btn--close svg {
+        width: 20px;
+        height: 20px; }
+  .game-container > .right .group--arrows {
+    display: none; }
   .game-container > .center {
     flex: 1 1 auto;
     display: flex;
@@ -145,4 +160,31 @@
     background-position: 0px 0%; }
   to {
     background-position: 50px 0%; } }
+
+@media (orientation: portrait) {
+  .game-container {
+    flex-direction: column;
+    padding: 0;
+    overflow-y: auto; }
+    .game-container > .left {
+      flex: 1 1 auto;
+      min-width: auto;
+      padding: 25px 25px 0 25px; }
+      .game-container > .left > .group--head {
+        flex: 0 0 auto;
+        justify-content: space-between;
+        margin-bottom: 30px; }
+        .game-container > .left > .group--head > .btn--close {
+          display: block; }
+      .game-container > .left > .group--foot {
+        display: none; }
+    .game-container > .right {
+      flex: 1 1 auto;
+      min-width: auto;
+      padding: 0 25px 5px 25px; }
+      .game-container > .right > .group--head,
+      .game-container > .right > .group--foot {
+        display: none; }
+      .game-container > .right .group--arrows {
+        display: block; } }
 /*# sourceMappingURL=main.css.map */
