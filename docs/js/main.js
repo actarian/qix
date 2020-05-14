@@ -1683,6 +1683,7 @@
 	    State.ended = false;
 	    State.won = false;
 	    State.lost = false;
+	    State.addEnemy();
 	    this.setPercent();
 	  };
 
