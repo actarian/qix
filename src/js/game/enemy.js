@@ -14,11 +14,14 @@ export default class Enemy {
 
 	constructor() {
 		this.position = new Vector2();
+		this.getRandomPosition();
+		/*
 		if (State.enemies && State.enemies.length) {
 			this.getRandomPosition();
 		} else {
 			this.getCenterPosition();
 		}
+		*/
 		this.getRandomDirection();
 		this.speed = 3; // 2 + Math.random() * 2;
 		this.segment = new Segment();
@@ -80,21 +83,20 @@ export default class Enemy {
 		if (cut.hit(this, mouth.naturalHeight / 2)) {
 			const player = State.player;
 			cut.reset(player);
-		} else {
-			const bounce = ground.bounce(segment);
-			if (bounce) {
-				// this.position.copy(bounce.r);
-				// this.direction.x *= -1;
-				// this.direction.y *= -1;
-				this.direction.copy(bounce.d);
-			}
-			/*
-			else if (Math.random() * 100 < 1) {
-				this.getRandomDirection();
-			}
-			*/
-			return bounce;
 		}
+		const bounce = ground.bounce(segment);
+		if (bounce) {
+			// this.position.copy(bounce.r);
+			// this.direction.x *= -1;
+			// this.direction.y *= -1;
+			this.direction.copy(bounce.d);
+		}
+		/*
+		else if (Math.random() * 100 < 1) {
+			this.getRandomDirection();
+		}
+		*/
+		return bounce;
 	}
 
 	move() {

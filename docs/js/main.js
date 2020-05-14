@@ -422,7 +422,8 @@
 	  keys: {},
 	  score: 0,
 	  area: 0,
-	  maxEnemies: 5,
+	  minEnemies: 2,
+	  maxEnemies: 6,
 	  addEnemy: function addEnemy() {},
 	  removeEnemy: function removeEnemy() {},
 	  addScore: function addScore() {},
@@ -934,12 +935,14 @@
 
 	  function Enemy() {
 	    this.position = new Vector2();
-
+	    this.getRandomPosition();
+	    /*
 	    if (State.enemies && State.enemies.length) {
-	      this.getRandomPosition();
+	    	this.getRandomPosition();
 	    } else {
-	      this.getCenterPosition();
+	    	this.getCenterPosition();
 	    }
+	    */
 
 	    this.getRandomDirection();
 	    this.speed = 3; // 2 + Math.random() * 2;
@@ -1005,24 +1008,24 @@
 	    if (cut.hit(this, mouth.naturalHeight / 2)) {
 	      var player = State.player;
 	      cut.reset(player);
-	    } else {
-	      var bounce = ground.bounce(segment);
-
-	      if (bounce) {
-	        // this.position.copy(bounce.r);
-	        // this.direction.x *= -1;
-	        // this.direction.y *= -1;
-	        this.direction.copy(bounce.d);
-	      }
-	      /*
-	      else if (Math.random() * 100 < 1) {
-	      	this.getRandomDirection();
-	      }
-	      */
-
-
-	      return bounce;
 	    }
+
+	    var bounce = ground.bounce(segment);
+
+	    if (bounce) {
+	      // this.position.copy(bounce.r);
+	      // this.direction.x *= -1;
+	      // this.direction.y *= -1;
+	      this.direction.copy(bounce.d);
+	    }
+	    /*
+	    else if (Math.random() * 100 < 1) {
+	    	this.getRandomDirection();
+	    }
+	    */
+
+
+	    return bounce;
 	  };
 
 	  _proto.move = function move() {
@@ -1620,7 +1623,7 @@
 	    var canvas = this.canvas = State.canvas = new Canvas(750, 750);
 	    var ground = this.ground = State.ground = new Ground();
 	    var cut = this.cut = State.cut = new Cut();
-	    var enemies = State.enemies = new Array(1).fill(0).map(function (x) {
+	    var enemies = State.enemies = new Array(State.minEnemies).fill(0).map(function (x) {
 	      return new Enemy();
 	    });
 	    var player = State.player = new Player();
@@ -1669,7 +1672,7 @@
 	    container.classList.remove('game-container--ended');
 	    State.ground = new Ground();
 	    State.cut = new Cut();
-	    State.enemies = new Array(1).fill(0).map(function (x) {
+	    State.enemies = new Array(State.minEnemies).fill(0).map(function (x) {
 	      return new Enemy();
 	    });
 	    State.player = new Player();
@@ -1694,6 +1697,13 @@
 	      State.removeEnemy(enemy);
 	      State.addEnemyScore(enemy);
 	    });
+
+	    if (State.enemies.length === 0) {
+	      State.enemies = new Array(State.minEnemies).fill(0).map(function (x) {
+	        return new Enemy();
+	      });
+	    }
+
 	    State.area = ground.getArea();
 	    State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100);
 

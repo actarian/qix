@@ -12,7 +12,7 @@ export default class Game {
 		const canvas = this.canvas = State.canvas = new Canvas(750, 750);
 		const ground = this.ground = State.ground = new Ground();
 		const cut = this.cut = State.cut = new Cut();
-		const enemies = State.enemies = new Array(1).fill(0).map(x => new Enemy());
+		const enemies = State.enemies = new Array(State.minEnemies).fill(0).map(x => new Enemy());
 		const player = State.player = new Player();
 		const assets = State.assets = {
 			designer: './img/game/designer.jpg',
@@ -56,7 +56,7 @@ export default class Game {
 		container.classList.remove('game-container--ended');
 		State.ground = new Ground();
 		State.cut = new Cut();
-		State.enemies = new Array(1).fill(0).map(x => new Enemy());
+		State.enemies = new Array(State.minEnemies).fill(0).map(x => new Enemy());
 		State.player = new Player();
 		State.area = 0;
 		State.percent = 0;
@@ -77,6 +77,9 @@ export default class Game {
 			State.removeEnemy(enemy);
 			State.addEnemyScore(enemy);
 		});
+		if (State.enemies.length === 0) {
+			State.enemies = new Array(State.minEnemies).fill(0).map(x => new Enemy());
+		}
 		State.area = ground.getArea();
 		State.percent = Math.round((State.totalArea - State.area) / State.totalArea * 100);
 		if (State.percent >= 75) {
