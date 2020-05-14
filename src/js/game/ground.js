@@ -27,23 +27,7 @@ export default class Ground extends Polygon {
 	remove(polygon, firstSegment, lastSegment) {
 		if (polygon.segments.length) {
 			const cutPoints = polygon.getPoints(true);
-			/*
-			let checkPoints = cutPoints.slice();
-			const first = checkPoints[0];
-			if (firstSegment.a.distanceTo(first) < firstSegment.b.distanceTo(first)) {
-				checkPoints.unshift(firstSegment.a);
-			} else {
-				checkPoints.unshift(firstSegment.b);
-			}
-			const last = checkPoints[checkPoints.length - 1];
-			if (lastSegment.a.distanceTo(last) < lastSegment.b.distanceTo(last)) {
-				checkPoints.push(lastSegment.a);
-			} else {
-				checkPoints.push(lastSegment.b);
-			}
-			const isClockWise = polygon.IsClockwise(checkPoints);
-			*/
-			const isClockWise = false;
+			const isClockWise = firstSegment === lastSegment && polygon.IsClockwise(cutPoints.slice());
 			const forwardPoints = this.getForwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
 			const backwardPoints = this.getBackwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
 			const a1 = this.getAreaFromPoints(forwardPoints);

@@ -1180,24 +1180,7 @@
 	  _proto.remove = function remove(polygon, firstSegment, lastSegment) {
 	    if (polygon.segments.length) {
 	      var cutPoints = polygon.getPoints(true);
-	      /*
-	      let checkPoints = cutPoints.slice();
-	      const first = checkPoints[0];
-	      if (firstSegment.a.distanceTo(first) < firstSegment.b.distanceTo(first)) {
-	      	checkPoints.unshift(firstSegment.a);
-	      } else {
-	      	checkPoints.unshift(firstSegment.b);
-	      }
-	      const last = checkPoints[checkPoints.length - 1];
-	      if (lastSegment.a.distanceTo(last) < lastSegment.b.distanceTo(last)) {
-	      	checkPoints.push(lastSegment.a);
-	      } else {
-	      	checkPoints.push(lastSegment.b);
-	      }
-	      const isClockWise = polygon.IsClockwise(checkPoints);
-	      */
-
-	      var isClockWise = false;
+	      var isClockWise = firstSegment === lastSegment && polygon.IsClockwise(cutPoints.slice());
 	      var forwardPoints = this.getForwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
 	      var backwardPoints = this.getBackwardPoints(cutPoints, firstSegment, lastSegment, isClockWise);
 	      var a1 = this.getAreaFromPoints(forwardPoints);
