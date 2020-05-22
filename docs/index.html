@@ -59,7 +59,7 @@
 	</svg>
 
 	<div class="group--popup">
-		<div class="game-container">
+		<div class="game-container game-container--intro">
 			<div class="left">
 				<div class="group--head">
 					<a class="logo" href="https://www.tau-marin.it/" rel="home">
@@ -75,8 +75,8 @@
 						<div class="title">Splendido!</div>
 					</div>
 					<div class="group--progress">
-						<div class="progress">
-							<div class="progress__bar"></div>
+						<div class="group--progress__track">
+							<div class="group--progress__bar"></div>
 						</div>
 						<div class="percent">0%</div>
 					</div>
@@ -84,6 +84,41 @@
 				<div class="group--foot"></div>
 			</div>
 			<div class="center">
+				<div class="group--rules">
+					<div class="group--rule">
+						<div class="group--rule__text">Scopri almeno il 75% dell’immagine per completare il gioco.</div>
+						<div class="group--rule__infographic">
+							<div class="group--progress">
+								<div class="group--progress__track">
+									<div class="group--progress__bar" style="width: 75%;"></div>
+								</div>
+								<div class="percent">75%</div>
+							</div>
+						</div>
+					</div>
+					<div class="group--rule">
+						<div class="group--rule__text">Usa le frecce della tastiera per muovere il diamante e scoprire porzioni dell’immagine.</div>
+						<div class="group--rule__infographic">
+							<img src="/qix/img/game/diamond-path.png" />
+							<img src="/qix/img/game/arrows.png" />
+						</div>
+					</div>
+					<div class="group--rule">
+						<div class="group--rule__text">Tieni premuta la barra spaziatrice per tracciare la linea.</div>
+						<div class="group--rule__infographic">
+							<div class="btn--cta btn--space">Spazio</div>
+						</div>
+					</div>
+					<div class="group--rule">
+						<div class="group--rule__text">Mentre tracci la linea, non permettere alla bocca di catturarti.</div>
+						<div class="group--rule__infographic">
+							<img src="/qix/img/game/mouth.png" />
+						</div>
+					</div>
+					<div class="group--cta">
+						<div class="btn--cta btn--start">Inizia il gioco</div>
+					</div>
+				</div>
 				<div class="game">
 					<div class="inner">
 						<canvas class="canvas"></canvas>
@@ -106,6 +141,10 @@
 					</div>
 				</div>
 				<div class="group--foot"></div>
+			</div>
+			<div class="group--intro">
+				<img class="group--intro__title" src="/qix/img/game/title.png" />
+				<img class="group--intro__mouth" src="/qix/img/game/title-mouth.png" />
 			</div>
 		</div>
 	</div>
