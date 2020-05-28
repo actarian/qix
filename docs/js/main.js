@@ -1752,6 +1752,7 @@
 	  };
 
 	  _proto.start = function start() {
+	    console.log('start');
 	    State.area = 0;
 	    State.intro = false;
 	    State.rules = false;
@@ -1767,8 +1768,8 @@
 	    State.rules = false;
 	    State.paused = false;
 	    State.game = true;
-	    State.ended = true;
-	    State.percent = 100;
+	    State.ended = true; // State.percent = 100;
+
 	    State.ended = true;
 	    State.won = true;
 	    this.updateStateClasses();

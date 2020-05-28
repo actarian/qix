@@ -160,6 +160,7 @@
 
 	.group--intro {
 		display: none;
+		pointer-events: none;
 	}
 
 	&.game-container--intro {
@@ -355,7 +356,6 @@
 }
 
 @media (orientation: landscape) {
-
 	@media (max-width: 1300px) {
 		.game-container {
 			.group--rules {
@@ -375,8 +375,8 @@
 }
 
 @media (orientation: portrait) {
-
 	.game-container {
+		display: block;
 		flex-direction: column;
 		padding: 0;
 		overflow-y: auto;

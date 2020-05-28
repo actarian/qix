@@ -99,7 +99,8 @@
     justify-content: center;
     align-items: center; }
   .game-container .group--intro {
-    display: none; }
+    display: none;
+    pointer-events: none; }
   .game-container.game-container--intro .group--intro {
     position: absolute;
     top: 0;
@@ -251,6 +252,7 @@
 
 @media (orientation: portrait) {
   .game-container {
+    display: block;
     flex-direction: column;
     padding: 0;
     overflow-y: auto; }

@@ -126,6 +126,7 @@ export default class Game {
 	}
 
 	start() {
+		console.log('start');
 		State.area = 0;
 		State.intro = false;
 		State.rules = false;
@@ -142,7 +143,7 @@ export default class Game {
 		State.paused = false;
 		State.game = true;
 		State.ended = true;
-		State.percent = 100;
+		// State.percent = 100;
 		State.ended = true;
 		State.won = true;
 		this.updateStateClasses();
