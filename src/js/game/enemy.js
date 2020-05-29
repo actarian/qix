@@ -81,8 +81,7 @@ export default class Enemy {
 			this.position.y + this.direction.y * (mouth.naturalHeight / 2 + this.speed),
 		);
 		if (cut.hit(this, mouth.naturalHeight / 2)) {
-			const player = State.player;
-			cut.reset(player);
+			State.onPlayerReset(this);
 		}
 		const bounce = ground.bounce(segment);
 		if (bounce) {

@@ -33,12 +33,11 @@ export default class Cut extends Polygon {
 		this.direction.y = actor.direction.y;
 	}
 
-	close(actor) {
+	close() {
 		this.segments = [];
 	}
 
-	reset(actor) {
-		actor.position.copy(this.start);
+	reset() {
 		this.direction.x = 0;
 		this.direction.y = 0;
 		this.segments = [];

@@ -126,7 +126,6 @@ export default class Game {
 	}
 
 	start() {
-		console.log('start');
 		State.area = 0;
 		State.intro = false;
 		State.rules = false;
@@ -208,8 +207,30 @@ export default class Game {
 		progress.innerText = percent;
 	}
 
-	onPlayerReset() {
+	onPlayerReset(enemy) {
 		State.keys.space = State.keys.shift = false;
+		if (enemy) {
+			State.paused = true;
+			const obj = { scale: 1 };
+			gsap.to(obj, {
+				scale: 1.2,
+				duration: 0.2,
+				repeat: 5,
+				yoyo: true,
+				onUpdate: () => {
+					State.player.scale = obj.scale;
+					this.draw();
+				},
+				onComplete: () => {
+					State.player.position.copy(State.cut.start);
+					State.cut.reset();
+					State.paused = false;
+				}
+			});
+		} else {
+			State.player.position.copy(State.cut.start);
+			State.cut.reset();
+		}
 	}
 
 	addEnemy() {
@@ -244,6 +265,14 @@ export default class Game {
 	addScore(score) {
 		State.score += score;
 		// console.log('addScore', score);
+	}
+
+	draw() {
+		State.canvas.update();
+		State.ground.draw();
+		State.cut.draw();
+		State.enemies.forEach(x => x.draw());
+		State.player.draw();
 	}
 
 	loop() {

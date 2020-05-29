@@ -883,12 +883,11 @@
 	    this.direction.y = actor.direction.y;
 	  };
 
-	  _proto.close = function close(actor) {
+	  _proto.close = function close() {
 	    this.segments = [];
 	  };
 
-	  _proto.reset = function reset(actor) {
-	    actor.position.copy(this.start);
+	  _proto.reset = function reset() {
 	    this.direction.x = 0;
 	    this.direction.y = 0;
 	    this.segments = [];
@@ -1011,8 +1010,7 @@
 	    segment.b.set(this.position.x + this.direction.x * (mouth.naturalHeight / 2 + this.speed), this.position.y + this.direction.y * (mouth.naturalHeight / 2 + this.speed));
 
 	    if (cut.hit(this, mouth.naturalHeight / 2)) {
-	      var player = State.player;
-	      cut.reset(player);
+	      State.onPlayerReset(this);
 	    }
 
 	    var bounce = ground.bounce(segment);
@@ -1413,6 +1411,7 @@
 
 	  function Player() {
 	    var ground = State.ground;
+	    this.scale = 1;
 	    this.position = new Vector2(ground.x(0.5), ground.y(1));
 	    this.direction = new Vector2(0, 0);
 	    this.speed = 5;
@@ -1443,7 +1442,7 @@
 	    ctx.restore();
 	    */
 
-	    canvas.drawImage(diamond, this.position.x, this.position.y, 1, this.getOrientation() === 0 ? Math.PI / 2 : 0);
+	    canvas.drawImage(diamond, this.position.x, this.position.y, this.scale, this.getOrientation() === 0 ? Math.PI / 2 : 0);
 	    /*
 	    ctx.beginPath();
 	    ctx.strokeStyle = "black";
@@ -1523,7 +1522,6 @@
 	          this.currentSegment = hitted;
 	        }
 	      } else if (cut.hitSegments(this, 3)) {
-	        cut.reset(this);
 	        this.direction.x = 0;
 	        this.direction.y = 0;
 	        State.onPlayerReset();
@@ -1752,7 +1750,6 @@
 	  };
 
 	  _proto.start = function start() {
-	    console.log('start');
 	    State.area = 0;
 	    State.intro = false;
 	    State.rules = false;
@@ -1846,12 +1843,40 @@
 	    progress.innerText = percent;
 	  };
 
-	  _proto.onPlayerReset = function onPlayerReset() {
+	  _proto.onPlayerReset = function onPlayerReset(enemy) {
+	    var _this3 = this;
+
 	    State.keys.space = State.keys.shift = false;
+
+	    if (enemy) {
+	      State.paused = true;
+	      var obj = {
+	        scale: 1
+	      };
+	      gsap.to(obj, {
+	        scale: 1.2,
+	        duration: 0.2,
+	        repeat: 5,
+	        yoyo: true,
+	        onUpdate: function onUpdate() {
+	          State.player.scale = obj.scale;
+
+	          _this3.draw();
+	        },
+	        onComplete: function onComplete() {
+	          State.player.position.copy(State.cut.start);
+	          State.cut.reset();
+	          State.paused = false;
+	        }
+	      });
+	    } else {
+	      State.player.position.copy(State.cut.start);
+	      State.cut.reset();
+	    }
 	  };
 
 	  _proto.addEnemy = function addEnemy() {
-	    var _this3 = this;
+	    var _this4 = this;
 
 	    if (this.to) {
 	      clearTimeout(this.to);
@@ -1865,7 +1890,7 @@
 	          State.enemies.push(new Enemy());
 	        }
 
-	        _this3.addEnemy();
+	        _this4.addEnemy();
 	      }
 	    };
 
@@ -1888,6 +1913,16 @@
 
 	  _proto.addScore = function addScore(score) {
 	    State.score += score; // console.log('addScore', score);
+	  };
+
+	  _proto.draw = function draw() {
+	    State.canvas.update();
+	    State.ground.draw();
+	    State.cut.draw();
+	    State.enemies.forEach(function (x) {
+	      return x.draw();
+	    });
+	    State.player.draw();
 	  };
 
 	  _proto.loop = function loop() {

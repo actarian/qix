@@ -14,6 +14,7 @@ export default class Player {
 
 	constructor() {
 		const ground = State.ground;
+		this.scale = 1;
 		this.position = new Vector2(ground.x(0.5), ground.y(1));
 		this.direction = new Vector2(0, 0);
 		this.speed = 5;
@@ -41,7 +42,7 @@ export default class Player {
 		ctx.drawImage(diamond, -diamond.naturalWidth / 2 + 100, -diamond.naturalHeight / 2);
 		ctx.restore();
 		*/
-		canvas.drawImage(diamond, this.position.x, this.position.y, 1, this.getOrientation() === 0 ? Math.PI / 2 : 0);
+		canvas.drawImage(diamond, this.position.x, this.position.y, this.scale, this.getOrientation() === 0 ? Math.PI / 2 : 0);
 		/*
 		ctx.beginPath();
 		ctx.strokeStyle = "black";
@@ -115,7 +116,6 @@ export default class Player {
 					this.currentSegment = hitted;
 				}
 			} else if (cut.hitSegments(this, 3)) {
-				cut.reset(this);
 				this.direction.x = 0;
 				this.direction.y = 0;
 				State.onPlayerReset();
